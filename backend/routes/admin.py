@@ -24,7 +24,7 @@ def admin_signup():
 
         password = data["password"]
 
-        # CHECK USER EXISTS
+       
         cur.execute(
 
             """
@@ -38,13 +38,10 @@ def admin_signup():
 
         existing_user = cur.fetchone()
 
-        # =====================================
-        # IF USER ALREADY EXISTS
-        # =====================================
-
+      
         if existing_user:
 
-            # ALREADY ADMIN
+          
             if existing_user[5] == True:
 
                 return jsonify({
@@ -53,7 +50,6 @@ def admin_signup():
 
                 }), 400
 
-            # UPDATE USER TO ADMIN
             cur.execute(
 
                 """
@@ -68,20 +64,16 @@ def admin_signup():
 
             conn.commit()
 
-            # SEND OWNER OTP
             send_admin_otp(email)
 
             return jsonify({
 
-                "message": "Admin OTP Sent To Owner"
+                "message": "tara boss the OG divy ne ke otp ape"
 
             })
 
-        # =====================================
-        # NEW ADMIN ACCOUNT
-        # =====================================
+      
 
-        # HASH PASSWORD
         hashed_password = bcrypt.hashpw(
 
             password.encode("utf-8"),
@@ -121,7 +113,7 @@ def admin_signup():
 
         return jsonify({
 
-            "message": "Admin OTP Sent To Owner"
+            "message": "tara boss the OG divy ne ke otp ape"
 
         })
 
@@ -206,7 +198,7 @@ def admin_verify_otp():
 
         return jsonify({
 
-            "message": "Admin Verified Successfully"
+            "message": "Admin Verified mc"
 
         })
 
@@ -297,7 +289,7 @@ def admin_login():
 
         return jsonify({
 
-            "message": "Admin Login Successful"
+            "message": "jaooo jovo admin na data "
 
         })
 
@@ -352,7 +344,7 @@ def admin_forgot_password():
 
         return jsonify({
 
-            "message": "OTP Sent Successfully"
+            "message": "loda email ma jo madaram chodaram "
 
         })
 
@@ -406,7 +398,7 @@ def admin_forgot_verify_otp():
 
         return jsonify({
 
-            "message": "OTP Verified Successfully"
+            "message": "OTP Verified thai gayu yeeeee 😉"
 
         })
 
@@ -477,7 +469,7 @@ def admin_reset_password():
 
         return jsonify({
 
-            "message": "Password Reset Successful"
+            "message": "le benco password reset"
 
         })
 
