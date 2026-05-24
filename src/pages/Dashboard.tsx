@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 
 function Dashboard() {
+  const navigate = useNavigate();
 
   const isLoggedIn = localStorage.getItem(
     "isLoggedIn"
@@ -104,6 +107,9 @@ function Dashboard() {
 
         <h1>
           Welcome to Tridosha AI
+            <button onClick={() => navigate("/assessment")}>
+        Dosha Test
+      </button>
         </h1>
 
       </main>

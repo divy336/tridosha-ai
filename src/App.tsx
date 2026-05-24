@@ -17,6 +17,8 @@ import AdminDashboard from "./admin/pages/AdminDashbord";
 import AdminForgotPasswordOTP from "./admin/pages/AdminForgotPasswordOTP";
 import AdminResetPassword from "./admin/pages/AdminResetPassword";
 import AdminForgotPassword from "./admin/pages/AdminForgotPassword";
+import Assessment from "./pages/Assessment";
+import Report from "./pages/Report";
 
 function App() {
 
@@ -38,6 +40,10 @@ function App() {
         <Route path="/admin/forgot-password" element={<AdminForgotPassword />} />
         <Route path="/admin/forgot-password-otp" element={<AdminForgotPasswordOTP />} />
         <Route path="/admin/reset-password" element={<AdminResetPassword />} />
+         <Route path="/assessment" element={<Assessment/>}/>
+                  <Route path="/Report" element={<Report/>}/>
+
+
       
       </Routes>
 
