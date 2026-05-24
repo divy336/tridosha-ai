@@ -1,8 +1,20 @@
 import { Link } from "react-router-dom";
+<<<<<<< HEAD
 import "./design/dashboad.css";
 
 function Dashboard() {
   const isLoggedIn = localStorage.getItem("isLoggedIn");
+=======
+import { useNavigate } from "react-router-dom";
+
+
+function Dashboard() {
+  const navigate = useNavigate();
+
+  const isLoggedIn = localStorage.getItem(
+    "isLoggedIn"
+  );
+>>>>>>> 1b64b9f71a8519be5886ebe9679f618a896a6590
 
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
@@ -48,6 +60,7 @@ function Dashboard() {
 
       {/* MAIN */}
 
+<<<<<<< HEAD
       <main>
         <h1 style={{ fontFamily: "revert-layer" }}>Welcome to</h1>
         <b
@@ -78,6 +91,22 @@ function Dashboard() {
           and behavioral assessment, receive curated dietary and yoga practices,
           and explore critical medication safety alerts.
         </span>
+=======
+      <main
+        style={{
+          textAlign: "center",
+          marginTop: "100px"
+        }}
+      >
+
+        <h1>
+          Welcome to Tridosha AI
+            <button onClick={() => navigate("/assessment")}>
+        Dosha Test
+      </button>
+        </h1>
+
+>>>>>>> 1b64b9f71a8519be5886ebe9679f618a896a6590
       </main>
     </section>
   );
