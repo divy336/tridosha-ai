@@ -410,7 +410,7 @@ const Report: React.FC = () => {
             border: '2px solid #FF9800',
             borderRadius: '8px',
             padding: '20px',
-            backgroundColor: '#FFF3E0'
+            backgroundColor: '#FFF3E0'    
           }}>
             <h3 style={{ marginTop: '0', color: '#E65100' }}>Morning Routine 🌅</h3>
             <ul style={{ paddingLeft: '20px', lineHeight: '1.8' }}>
