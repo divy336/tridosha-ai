@@ -73,7 +73,7 @@ const Report: React.FC = () => {
       {/* Header */}
       <header style={{ textAlign: 'center', marginBottom: '40px', borderBottom: '3px solid #8B4513', paddingBottom: '20px' }}>
         <h1 style={{ fontSize: '36px', color: '#8B4513', margin: '0 0 10px 0' }}>
-          🕉️ Your Ayurvedic Dosha Report
+           Your Ayurvedic Dosha Report
         </h1>
         <p style={{ fontSize: '18px', color: '#555' }}>
           Personalized Wellness Plan Based on Your Unique Constitution

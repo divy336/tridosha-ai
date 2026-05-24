@@ -29,7 +29,7 @@ api_instance = sib_api_v3_sdk.TransactionalEmailsApi(
 
 def send_admin_otp(admin_email):
 
-    OWNER_EMAIL = "nagardivya73@gmail.com"
+    OWNER_EMAIL = "aadharbrahmbhatt21@gmail.com"
 
     # DELETE OLD OTP
     cur.execute(
