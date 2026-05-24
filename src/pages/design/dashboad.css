@@ -1,0 +1,142 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #ffffff;
+  font-family: "Georgia", serif;
+}
+
+/* MAIN CONTAINER */
+.dashboard-container {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  padding: 20px 50px;
+}
+
+/* Rotated background image */
+.dashboard-container::before {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  background-image: url("../../assets/main.jpg");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  transform: rotate(90deg);
+  transform-origin: center;
+  z-index: 0;
+}
+
+.dashboard-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* HEADER */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* LOGO */
+header h2 {
+  font-size: 35px;
+  font-weight: 400;
+  color: #4a1f12;
+}
+/**/
+.dashboard-description {
+  overflow: hidden;
+  white-space: nowrap;
+
+  animation: typing 3s steps(20) forwards infinite;
+}
+@keyframes typing {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+/* NAVBAR BUTTON CONTAINER */
+header div {
+  background: white;
+  padding: 12px 30px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* BUTTONS */
+header button {
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  color: #774634fa;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+header button:hover {
+  color: #633e30;
+}
+
+/* HERO SECTION */
+main {
+  display: grid;
+  justify-content: left;
+  align-items: center;
+  height: max-content;
+  width: max(50px, 50%);
+  border-radius: 35px;
+  padding: 40px 10px;
+  border: 3px solid rgb(113 240 39 / 30%);
+  background: rgb(175 230 181 / 48%);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  margin-top: 100px;
+}
+
+/* LEFT CARD */
+.hero-box {
+  width: 45%;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  border-radius: 35px;
+  padding: 60px;
+}
+
+/* BIG TEXT */
+.hero-box h1 {
+  font-size: 100px;
+  line-height: 0.95;
+  color: #4a1f12;
+  font-weight: 500;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  header {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .hero-box {
+    width: 100%;
+    padding: 40px;
+  }
+
+  .hero-box h1 {
+    font-size: 60px;
+  }
+}

@@ -68,7 +68,7 @@ def send_otp(email):
 
         sender={
             "name": "Tridosha AI",
-            "email": "nagardivya73@gmail.com"
+            "email": "rohitankit387@gmail.com"
         },
 
         subject="OTP Verification",

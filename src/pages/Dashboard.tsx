@@ -1,115 +1,85 @@
 import { Link } from "react-router-dom";
+import "./design/dashboad.css";
 
 function Dashboard() {
-
-  const isLoggedIn = localStorage.getItem(
-    "isLoggedIn"
-  );
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
 
   const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
 
-    localStorage.removeItem(
-      "isLoggedIn"
-    );
-
-    localStorage.removeItem(
-      "userEmail"
-    );
+    localStorage.removeItem("userEmail");
 
     window.location.reload();
-
   };
 
   return (
-
-    <div>
-
+    <section className="dashboard-container">
       {/* HEADER */}
 
-      <header
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          padding: "20px",
-          borderBottom: "1px solid lightgray"
-        }}
-      >
-
-        <h2>
-          Tridosha AI
-        </h2>
+      <header>
+        <h2>Ayurveda</h2>
 
         <div>
-
           {/* IF NOT LOGGED IN */}
 
           {!isLoggedIn && (
-
             <>
-
               <Link to="/login">
-
-                <button>
-
-                  Login
-
-                </button>
-
+                <button>Login</button>
               </Link>
 
               <Link to="/signup">
-
                 <button
                   style={{
-                    marginLeft: "10px"
+                    marginLeft: "10px",
                   }}
                 >
-
                   Signup
-
                 </button>
-
               </Link>
-
             </>
-
           )}
 
           {/* IF LOGGED IN */}
 
-          {isLoggedIn && (
-
-            <button
-              onClick={handleLogout}
-            >
-
-              Logout
-
-            </button>
-
-          )}
-
+          {isLoggedIn && <button onClick={handleLogout}>Logout</button>}
         </div>
-
       </header>
 
       {/* MAIN */}
 
-      <main
-        style={{
-          textAlign: "center",
-          marginTop: "100px"
-        }}
-      >
-
-        <h1>
-          Welcome to Tridosha AI
-        </h1>
-
+      <main>
+        <h1 style={{ fontFamily: "revert-layer" }}>Welcome to</h1>
+        <b
+          className="dashboard-description"
+          style={{ fontFamily: "fangsong", fontSize: 60, width: "100%" }}
+        >
+          Ayurveda
+        </b>
+        <span
+          style={{
+            fontSize: 30,
+            color: "rgb(51, 78, 36)",
+            fontFamily:
+              "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+          }}
+        >
+          Discover Your Ayurvedic Constitution
+        </span>
+        <br></br>
+        <span
+          style={{
+            fontSize: 20,
+            color: "rgb(51, 78, 36)",
+            fontFamily: "cursive",
+          }}
+        >
+          Analyze your biological energies (Doshas) through our refined physical
+          and behavioral assessment, receive curated dietary and yoga practices,
+          and explore critical medication safety alerts.
+        </span>
       </main>
-
-    </div>
-
+    </section>
   );
 }
 
