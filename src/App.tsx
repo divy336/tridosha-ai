@@ -16,6 +16,7 @@ import AdminForgotPassword from "./admin/pages/AdminForgotPassword";
 import Assessment from "./pages/Assessment";
 import Report from "./pages/Report";
 
+
 function App() {
   return (
     <BrowserRouter>
@@ -41,6 +42,7 @@ function App() {
         <Route path="/admin/reset-password" element={<AdminResetPassword />} />
         <Route path="/assessment" element={<Assessment />} />
         <Route path="/Report" element={<Report />} />
+
       </Routes>
     </BrowserRouter>
   );

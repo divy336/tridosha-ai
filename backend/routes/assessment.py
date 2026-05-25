@@ -1181,3 +1181,4 @@ def calculate_wellness_score(percentages, symptoms):
     score = max(0, min(100, score))
     
     return score
+
