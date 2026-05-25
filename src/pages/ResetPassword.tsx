@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
+import "./design/passreset.css";
+
 function ResetPassword() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -24,7 +26,7 @@ function ResetPassword() {
       const res = await axios.post("http://127.0.0.1:5000/api/reset-password", {
         email,
         token,
-        password
+        password,
       });
 
       alert(res.data.message);
@@ -35,27 +37,50 @@ function ResetPassword() {
   };
 
   return (
-    <div>
-      <h1>Reset Password</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="password"
-          placeholder="New Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <br />
-        <br />
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-        />
-        <br />
-        <br />
-        <button type="submit">Update Password</button>
-      </form>
+    <div className="passreset-page">
+      <div className="passreset-card">
+        <div className="passreset-brand">
+          <div className="passreset-logo">
+            <span>🌿</span>
+          </div>
+          <div>
+            <h2 className="passreset-title">Ayurveda</h2>
+            <div className="passreset-subtitle"></div>
+          </div>
+        </div>
+
+        <h1>Reset Password</h1>
+
+        <form onSubmit={handleSubmit} className="passreset-form">
+          <div className="field">
+            <div className="label">New Password</div>
+            <input
+              className="input"
+              type="password"
+              placeholder="New Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="field">
+            <div className="label">Confirm Password</div>
+            <input
+              className="input"
+              type="password"
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <button type="submit" className="btn">
+            Update Password
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

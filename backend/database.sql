@@ -61,3 +61,50 @@ CREATE TABLE password_reset_tokens (
     is_used BOOLEAN DEFAULT FALSE
 
 );
+
+
+CREATE TABLE assessments (
+
+    id SERIAL PRIMARY KEY,
+
+    user_id INTEGER REFERENCES users(id)
+    ON DELETE CASCADE,
+
+    body_frame VARCHAR(10),
+
+    skin_type VARCHAR(10),
+
+    hair_type VARCHAR(10),
+
+    weight_pattern VARCHAR(10),
+
+    appetite VARCHAR(10),
+
+    digestion VARCHAR(10),
+
+    thirst VARCHAR(10),
+
+    mind_state VARCHAR(10),
+
+    sleep_pattern VARCHAR(10),
+
+    climate_preference VARCHAR(10),
+
+    symptoms TEXT,
+
+    dominant_dosha VARCHAR(50),
+
+    constitution_type VARCHAR(50),
+
+    vata_percentage FLOAT,
+
+    pitta_percentage FLOAT,
+
+    kapha_percentage FLOAT,
+
+    wellness_score FLOAT,
+
+    created_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP
+
+);

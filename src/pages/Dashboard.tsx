@@ -1,8 +1,9 @@
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
+import "./design/dashboad.css";
 
 function Dashboard() {
+
   const navigate = useNavigate();
 
   const isLoggedIn = localStorage.getItem(
@@ -11,13 +12,9 @@ function Dashboard() {
 
   const handleLogout = () => {
 
-    localStorage.removeItem(
-      "isLoggedIn"
-    );
+    localStorage.removeItem("isLoggedIn");
 
-    localStorage.removeItem(
-      "userEmail"
-    );
+    localStorage.removeItem("userEmail");
 
     window.location.reload();
 
@@ -25,22 +22,13 @@ function Dashboard() {
 
   return (
 
-    <div>
+    <section className="dashboard-container">
 
       {/* HEADER */}
 
-      <header
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          padding: "20px",
-          borderBottom: "1px solid lightgray"
-        }}
-      >
+      <header>
 
-        <h2>
-          Tridosha AI
-        </h2>
+        <h2>Ayurveda</h2>
 
         <div>
 
@@ -53,9 +41,7 @@ function Dashboard() {
               <Link to="/login">
 
                 <button>
-
                   Login
-
                 </button>
 
               </Link>
@@ -64,12 +50,10 @@ function Dashboard() {
 
                 <button
                   style={{
-                    marginLeft: "10px"
+                    marginLeft: "10px",
                   }}
                 >
-
                   Signup
-
                 </button>
 
               </Link>
@@ -82,12 +66,8 @@ function Dashboard() {
 
           {isLoggedIn && (
 
-            <button
-              onClick={handleLogout}
-            >
-
+            <button onClick={handleLogout}>
               Logout
-
             </button>
 
           )}
@@ -98,25 +78,64 @@ function Dashboard() {
 
       {/* MAIN */}
 
-      <main
-        style={{
-          textAlign: "center",
-          marginTop: "100px"
-        }}
-      >
+      <main>
 
-        <h1>
-          Welcome to Tridosha AI
-            <button onClick={() => navigate("/assessment")}>
-        Dosha Test
-      </button>
+        <h1
+          className="welcome"
+          style={{
+            fontFamily: "revert-layer"
+          }}
+        >
+          Welcome to
         </h1>
+
+        <b
+          className="dashboard-description"
+          style={{
+            fontFamily: "fangsong",
+            fontSize: 60,
+            width: "100%"
+          }}
+        >
+          Ayurveda
+        </b>
+
+        <br />
+
+        <span className="dashboard-des">
+
+          Discover Your Ayurvedic Constitution
+
+        </span>
+
+        <br />
+
+        <span className="dashboard-de">
+
+          Analyze your biological energies
+          (Doshas) through our refined
+          physical and behavioral assessment,
+          receive curated dietary and yoga
+          practices, and explore critical
+          medication safety alerts.
+
+        </span>
+
+        <br />
+        <br />
+
+        <button
+          onClick={() => navigate("/assessment")}
+        >
+          Dosha Test
+        </button>
 
       </main>
 
-    </div>
+    </section>
 
   );
+
 }
 
 export default Dashboard;
