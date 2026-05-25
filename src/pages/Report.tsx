@@ -666,38 +666,56 @@ pdf.text(
   return (
     <div ref={reportRef} style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
       {/* Header */}
-      <header style={{ textAlign: 'center', marginBottom: '40px', borderBottom: '3px solid #8B4513', paddingBottom: '20px' }}>
-        <h1 style={{ fontSize: '36px', color: '#8B4513', margin: '0 0 10px 0' }}>
-           Your Ayurvedic Dosha Report
-        </h1>
-        <p style={{ fontSize: '18px', color: '#555' }}>
-          Personalized Wellness Plan Based on Your Unique Constitution
-        </p>
-<<<<<<< HEAD
-        
-        {/* Download PDF Button */}
-        <button
-          onClick={downloadPDF}
-          style={{
-            marginTop: '20px',
-            padding: '12px 30px',
-            fontSize: '16px',
-            backgroundColor: '#E91E63',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-          }}
-        >
-          📄 Download PDF Report
-        </button>
-      </div>
-=======
-      </header>  
+   <header
+  style={{
+    textAlign: 'center',
+    marginBottom: '40px',
+    borderBottom: '3px solid #8B4513',
+    paddingBottom: '20px'
+  }}
+>
+
+  <h1
+    style={{
+      fontSize: '36px',
+      color: '#8B4513',
+      margin: '0 0 10px 0'
+    }}
+  >
+    Your Ayurvedic Dosha Report
+  </h1>
+
+  <p
+    style={{
+      fontSize: '18px',
+      color: '#555'
+    }}
+  >
+    Personalized Wellness Plan Based on Your Unique Constitution
+  </p>
+
+  {/* Download PDF Button */}
+
+  <button
+    onClick={downloadPDF}
+    style={{
+      marginTop: '20px',
+      padding: '12px 30px',
+      fontSize: '16px',
+      backgroundColor: '#E91E63',
+      color: 'white',
+      border: 'none',
+      borderRadius: '8px',
+      cursor: 'pointer',
+      fontWeight: 'bold',
+      boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+    }}
+  >
+    Download PDF Report
+  </button>
+
+</header>
       
->>>>>>> 7849c7c99a2800e1908e976b039b4e2f6f94b8d1
 
       
       <div style={{
