@@ -666,11 +666,14 @@ pdf.text(
   return (
     <div ref={reportRef} style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
       {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-        <h1>Your Personalized Ayurvedic Report</h1>
-        <p style={{ fontSize: '14px', color: '#666' }}>
-          Generated on {formatDate(result.timestamp)}
+      <header style={{ textAlign: 'center', marginBottom: '40px', borderBottom: '3px solid #8B4513', paddingBottom: '20px' }}>
+        <h1 style={{ fontSize: '36px', color: '#8B4513', margin: '0 0 10px 0' }}>
+           Your Ayurvedic Dosha Report
+        </h1>
+        <p style={{ fontSize: '18px', color: '#555' }}>
+          Personalized Wellness Plan Based on Your Unique Constitution
         </p>
+<<<<<<< HEAD
         
         {/* Download PDF Button */}
         <button
@@ -691,8 +694,12 @@ pdf.text(
           📄 Download PDF Report
         </button>
       </div>
+=======
+      </header>  
+      
+>>>>>>> 7849c7c99a2800e1908e976b039b4e2f6f94b8d1
 
-      {/* Wellness Score */}
+      
       <div style={{
         textAlign: 'center',
         padding: '30px',

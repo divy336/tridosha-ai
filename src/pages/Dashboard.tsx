@@ -126,6 +126,29 @@ function Dashboard() {
 
         <button
           onClick={() => navigate("/assessment")}
+          style={{
+            backgroundColor: "#4a7c59",
+            color: "#ffffff",
+            border: "2px solid #3a6647",
+            borderRadius: "8px",
+            padding: "12px 40px",
+            fontSize: "16px",
+            fontWeight: "600",
+            letterSpacing: "0.5px",
+            cursor: "pointer",
+            boxShadow: "0 4px 12px rgba(74, 124, 89, 0.35)",
+            transition: "all 0.2s ease",
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.backgroundColor = "#3a6647";
+            e.currentTarget.style.boxShadow = "0 6px 16px rgba(74, 124, 89, 0.5)";
+            e.currentTarget.style.transform = "translateY(-1px)";
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor = "#4a7c59";
+            e.currentTarget.style.boxShadow = "0 4px 12px rgba(74, 124, 89, 0.35)";
+            e.currentTarget.style.transform = "translateY(0)";
+          }}
         >
           Dosha Test
         </button>

@@ -2,9 +2,9 @@ from flask import Flask
 from flask_cors import CORS
 
 # IMPORT BLUEPRINT
-from routes.auth import auth
-from routes.admin import admin
-from routes.assessment import assessment
+from auth.router import auth
+from admin.router import admin
+from assessment.router import assessment
 
 app = Flask(__name__)
 
