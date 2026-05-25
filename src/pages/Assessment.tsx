@@ -35,106 +35,172 @@ const Assessment: React.FC = () => {
     symptoms: []
   });
 
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
+const [loading, setLoading] = useState<boolean>(false);
 
-  const handleInputChange = (field: 'email', value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+const [error, setError] = useState<string>('');
 
-  const handleRadioChange = (field: keyof Omit<FormData, 'symptoms' | 'email'>, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+const handleRadioChange = (
 
-  const handleCheckboxChange = (symptom: string) => {
-    setFormData(prev => ({
-      ...prev,
-      symptoms: prev.symptoms.includes(symptom)
-        ? prev.symptoms.filter(s => s !== symptom)
-        : [...prev.symptoms, symptom]
-    }));
-  };
+  field: keyof Omit<FormData, 'symptoms'>,
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+  value: string
 
-    // Validate email
-    if (!formData.email || !formData.email.includes('@')) {
-      setError('Please enter a valid email address');
-      return;
-    }
+) => {
 
-    const requiredFields: (keyof Omit<FormData, 'symptoms' | 'email'>)[] = [
-      'bodyFrame', 'skinType', 'hairType', 'weightPattern',
-      'appetite', 'digestion', 'thirst', 'mindState',
-      'sleepPattern', 'climatePreference'
-    ];
+  setFormData(prev => ({
 
-    const missingFields = requiredFields.filter(field => !formData[field]);
-    
-    if (missingFields.length > 0) {
-      setError('Please answer all questions before submitting');
-      return;
-    }
+    ...prev,
 
-    setLoading(true);
+    [field]: value
 
-    try {
-      const response = await axios.post('http://localhost:5000/api/submit-assessment', formData);
-      navigate('/report', { state: response.data });
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.error || 'Failed to submit assessment. Please try again.';
-      setError(errorMessage);
-      console.error('Submission error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }));
 
-  const symptoms = [
-    'Anxiety',
-    'Fatigue',
-    'Headache',
-    'Acidity',
-    'Bloating',
-    'Congestion',
-    'Insomnia',
-    'Irritability',
-    'Joint Pain',
-    'Brain Fog'
+};
+
+const handleCheckboxChange = (
+
+  symptom: string
+
+) => {
+
+  setFormData(prev => ({
+
+    ...prev,
+
+    symptoms: prev.symptoms.includes(symptom)
+
+      ? prev.symptoms.filter(s => s !== symptom)
+
+      : [...prev.symptoms, symptom]
+
+  }));
+
+};
+
+const handleSubmit = async (
+
+  e: React.FormEvent
+
+) => {
+
+  e.preventDefault();
+
+  setError('');
+
+  // GET LOGGED IN USER EMAIL
+  const userEmail = localStorage.getItem(
+    "userEmail"
+  );
+
+  const requiredFields: (
+
+    keyof Omit<FormData, 'symptoms'>
+
+  )[] = [
+
+    'bodyFrame',
+    'skinType',
+    'hairType',
+    'weightPattern',
+
+    'appetite',
+    'digestion',
+    'thirst',
+
+    'mindState',
+    'sleepPattern',
+    'climatePreference'
+
   ];
 
+  const missingFields = requiredFields.filter(
+
+    field => !formData[field]
+
+  );
+
+  if (missingFields.length > 0) {
+
+    setError(
+
+      'Please answer all questions before submitting'
+
+    );
+
+    return;
+
+  }
+
+  setLoading(true);
+
+  try {
+
+    const response = await axios.post(
+
+      "http://localhost:5000/api/submit-assessment",
+
+      {
+
+        ...formData,
+
+        email: userEmail
+
+      }
+
+    );
+
+    navigate('/report', {
+
+      state: response.data
+
+    });
+
+  } catch (err: any) {
+
+    const errorMessage =
+
+      err.response?.data?.error ||
+
+      'Failed to submit assessment. Please try again.';
+
+    setError(errorMessage);
+
+    console.error(
+
+      'Submission error:',
+      err
+
+    );
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
+
+const symptoms = [
+
+  'Anxiety',
+  'Fatigue',
+  'Headache',
+  'Acidity',
+  'Bloating',
+  'Congestion',
+  'Insomnia',
+  'Irritability',
+  'Joint Pain',
+  'Brain Fog'
+
+];
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
       <h1>Ayurvedic Dosha Assessment</h1>
       <p>Discover your unique constitution through this comprehensive assessment</p>
 
       <form onSubmit={handleSubmit}>
-        {/* Email Field */}
-        <div style={{ marginTop: '30px', marginBottom: '30px' }}>
-          <h3>Your Email Address</h3>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={formData.email}
-            onChange={(e) => handleInputChange('email', e.target.value)}
-            style={{
-              width: '100%',
-              padding: '10px',
-              fontSize: '16px',
-              border: '1px solid #ccc',
-              borderRadius: '4px'
-            }}
-            required
-          />
-        </div>
+      
 
         <div style={{ marginTop: '30px' }}>
           <h2>Section 1: Physical Traits</h2>
