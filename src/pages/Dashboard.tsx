@@ -80,7 +80,12 @@ function Dashboard() {
 
       <main>
 
-        <h1 style={{ fontFamily: "revert-layer" }}>
+        <h1
+          className="welcome"
+          style={{
+            fontFamily: "revert-layer"
+          }}
+        >
           Welcome to
         </h1>
 
@@ -95,39 +100,25 @@ function Dashboard() {
           Ayurveda
         </b>
 
-        <span
-          style={{
+        <br />
 
-            fontSize: 30,
+        <span className="dashboard-des">
 
-            color: "rgb(51, 78, 36)",
-
-            fontFamily:
-              "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-
-          }}
-        >
           Discover Your Ayurvedic Constitution
+
         </span>
 
         <br />
 
-        <span
-          style={{
+        <span className="dashboard-de">
 
-            fontSize: 20,
+          Analyze your biological energies
+          (Doshas) through our refined
+          physical and behavioral assessment,
+          receive curated dietary and yoga
+          practices, and explore critical
+          medication safety alerts.
 
-            color: "rgb(51, 78, 36)",
-
-            fontFamily: "cursive",
-
-          }}
-        >
-          Analyze your biological energies (Doshas)
-          through our refined physical and behavioral
-          assessment, receive curated dietary and yoga
-          practices, and explore critical medication
-          safety alerts.
         </span>
 
         <br />

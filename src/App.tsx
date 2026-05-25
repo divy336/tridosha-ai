@@ -1,8 +1,4 @@
-import {
-  BrowserRouter,
-  Routes,
-  Route
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Dashboard from "./pages/Dashboard";
 import Signup from "./pages/Signup";
@@ -21,34 +17,32 @@ import Assessment from "./pages/Assessment";
 import Report from "./pages/Report";
 
 function App() {
-
   return (
-
     <BrowserRouter>
-
       <Routes>
-        <Route path="/" element={<Dashboard />}/>
-        <Route path="/signup" element={<Signup />}/>
-        <Route path="/login" element={<Login />}/>
-        <Route path="/otp-verify" element={<OTPVerify/>} />
-        <Route path="/forgot-password"  element={<ForgotPassword />} />
-        <Route path="/reset-password"   element={<ResetPassword />} />
-        <Route path="/admin/otp-verify" element={<AdminOTPVerify />}/>
-        <Route path="/admin/signup" element={<AdminSignup />}/>
-        <Route path="/admin/login" element={<AdminLogin/>}/>
-        <Route path="/admin/dashboard" element={<AdminDashboard />}/>
-        <Route path="/admin/forgot-password" element={<AdminForgotPassword />} />
-        <Route path="/admin/forgot-password-otp" element={<AdminForgotPasswordOTP />} />
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/otp-verify" element={<OTPVerify />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/admin/otp-verify" element={<AdminOTPVerify />} />
+        <Route path="/admin/signup" element={<AdminSignup />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route
+          path="/admin/forgot-password"
+          element={<AdminForgotPassword />}
+        />
+        <Route
+          path="/admin/forgot-password-otp"
+          element={<AdminForgotPasswordOTP />}
+        />
         <Route path="/admin/reset-password" element={<AdminResetPassword />} />
-         <Route path="/assessment" element={<Assessment/>}/>
-                  <Route path="/Report" element={<Report/>}/>
-
-
-      
+        <Route path="/assessment" element={<Assessment />} />
+        <Route path="/Report" element={<Report />} />
       </Routes>
-
     </BrowserRouter>
-
   );
 }
 
