@@ -104,15 +104,9 @@ const Assessment: React.FC = () => {
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px', fontFamily: 'Arial, sans-serif' }}>
       {/* Header */}
       <header style={{ textAlign: 'center', marginBottom: '40px', borderBottom: '3px solid #8B4513', paddingBottom: '20px' }}>
-        <h1 style={{ fontSize: '36px', color: '#8B4513', margin: '0 0 10px 0' }}>
+        <h1 style={{textAlign: 'center', fontSize: '36px', color: '#8B4513', margin: '0 0 10px 0' }}>
            Ayurvedic Dosha Assessment
         </h1>
-        <p style={{ fontSize: '18px', color: '#555', margin: '5px 0' }}>
-          Discover Your Unique Constitutional Type
-        </p>
-        <p style={{ fontSize: '14px', color: '#777', margin: '5px 0' }}>
-          Answer all questions honestly for accurate personalized recommendations
-        </p>
       </header>
 
       {/* Error Message */}
