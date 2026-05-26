@@ -1,34 +1,21 @@
 import random
-
 from db import conn, cur
-
 from dotenv import load_dotenv
-
 import os
-
 import sib_api_v3_sdk
-
 from sib_api_v3_sdk.rest import ApiException
-
 
 load_dotenv()
 
 BREVO_API_KEY = os.getenv("BREVO_API_KEY")
-
 configuration = sib_api_v3_sdk.Configuration()
-
 configuration.api_key['api-key'] = BREVO_API_KEY
 
-
 api_instance = sib_api_v3_sdk.TransactionalEmailsApi(
-
     sib_api_v3_sdk.ApiClient(configuration)
-
 )
 
-
 def send_admin_reset_otp(email):
-
     # DELETE OLD OTP
     cur.execute(
 

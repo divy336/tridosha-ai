@@ -55,7 +55,7 @@ header h2 {
   overflow: hidden;
   white-space: nowrap;
   font-size: 40px;
-  animation: typing 3s steps(20) forwards infinite;
+  animation: typing 3s steps(60) forwards infinite;
 }
 @keyframes typing {
   from {
