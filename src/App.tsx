@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
+import "./App.css";
 import Dashboard from "./pages/Dashboard";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
@@ -15,7 +15,6 @@ import AdminResetPassword from "./admin/pages/AdminResetPassword";
 import AdminForgotPassword from "./admin/pages/AdminForgotPassword";
 import Assessment from "./pages/Assessment";
 import Report from "./pages/Report";
-
 
 function App() {
   return (
@@ -42,7 +41,6 @@ function App() {
         <Route path="/admin/reset-password" element={<AdminResetPassword />} />
         <Route path="/assessment" element={<Assessment />} />
         <Route path="/Report" element={<Report />} />
-
       </Routes>
     </BrowserRouter>
   );
