@@ -52,41 +52,52 @@ const Assessment: React.FC = () => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError('');
 
-    // Validate all radio questions are answered
-    const requiredFields: (keyof Omit<FormData, 'symptoms'>)[] = [
-      'bodyFrame', 'skinType', 'hairType', 'weightPattern',
-      'appetite', 'digestion', 'thirst', 'mindState',
-      'sleepPattern', 'climatePreference'
-    ];
+  // Validate all radio questions are answered
+  const requiredFields: (keyof Omit<FormData, 'symptoms'>)[] = [
+    'bodyFrame', 'skinType', 'hairType', 'weightPattern',
+    'appetite', 'digestion', 'thirst', 'mindState',
+    'sleepPattern', 'climatePreference'
+  ];
 
-    const missingFields = requiredFields.filter(field => !formData[field]);
+  const missingFields = requiredFields.filter(field => !formData[field]);
+  
+  if (missingFields.length > 0) {
+    setError('Please answer all questions before submitting');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    // GET EMAIL FROM LOCALSTORAGE OR CONTEXT
+    const email = localStorage.getItem('userEmail'); // ← ADD THIS
     
-    if (missingFields.length > 0) {
-      setError('Please answer all questions before submitting');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!email) {
+      setError('User not logged in. Please login first.');
+      setLoading(false);
       return;
     }
 
-    setLoading(true);
-
-    try {
-      const response = await axios.post('http://localhost:5000/api/submit-assessment', formData);
-      
-      // Navigate to report page with results
-      navigate('/report', { state: response.data });
-    } catch (err) {
-      setError('Failed to submit assessment. Please ensure the backend server is running on port 5000.');
-      console.error('Submission error:', err);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } finally {
-      setLoading(false);
-    }
-  };
-
+    const response = await axios.post('http://localhost:5000/api/submit-assessment', {
+      ...formData,
+      email: email  // ← ADD EMAIL HERE
+    });
+    
+    // Navigate to report page with results
+    navigate('/report', { state: response.data });
+  } catch (err) {
+    setError('Failed to submit assessment. Please ensure the backend server is running on port 5000.');
+    console.error('Submission error:', err);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } finally {
+    setLoading(false);
+  }
+};
   const symptoms = [
     'Anxiety',
     'Fatigue',

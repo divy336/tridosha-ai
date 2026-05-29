@@ -53,7 +53,7 @@ const Report: React.FC = () => {
   }
 
   const getDoshaColor = (dosha: string): string => {
-    switch (dosha.toLowerCase()) {
+    switch (dosha.toLowerCase()) {  
       case 'vata':
         return '#9C27B0';
       case 'pitta':
