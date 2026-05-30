@@ -118,19 +118,7 @@ const Assessment: React.FC = () => {
     "Joint Pain",
     "Brain Fog",
   ];
-  addEventListener("scroll", () => {
-    const fieldsets = document.querySelectorAll("fieldset");
-    const scrollPosition = window.scrollY + window.innerHeight / 2;
 
-    fieldsets.forEach((fieldset) => {
-      const rect = fieldset.getBoundingClientRect();
-      const fieldsetTop = rect.top + window.scrollY;
-      const fieldsetBottom = fieldsetTop + rect.height;
-      if (scrollPosition >= fieldsetTop && scrollPosition < fieldsetBottom) {
-        fieldset.classList.add("show");
-      }
-    });
-  });
   return (
     <div className="assessment-page">
       <div className="main-container">
@@ -222,7 +210,7 @@ const Assessment: React.FC = () => {
             </p>
 
             {/* Question 1 */}
-            <fieldset className="show">
+            <fieldset>
               <legend className="legends">1. Body Frame & Build</legend>
               <label
                 className="radio-input"

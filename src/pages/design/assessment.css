@@ -59,15 +59,8 @@ fieldset {
   border-radius: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   background-color: #aeb78454;
+}
 
-  transition: 1s ease;
-  opacity: 0;
-  scale: 0.3;
-}
-fieldset.show {
-  opacity: 1;
-  scale: 1;
-}
 .leaf {
   position: absolute;
   top: 20rem;
