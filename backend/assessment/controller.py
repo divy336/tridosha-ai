@@ -17,4 +17,4 @@ def get_total_users(db: Session):
     total.append(total_vata_dominant)
     total.append(total_pitta_dominant)
     total.append(total_kapha_dominant)
-    return {"total_users": total_users}
+    return {"total_users": total}
