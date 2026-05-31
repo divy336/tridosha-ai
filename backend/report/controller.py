@@ -1,21 +1,27 @@
 from datetime import datetime
+from db import conn, cur
+import json
 
 
-# ─── SCORING ────────────────────────────────────────────────────────────────
+# ─── CONSTANTS ───────────────────────────────────────────────────────────────
 
-def calculate_advanced_dosha_scores(answers, symptoms):
+ACTIVE_DOSHA_THRESHOLD  = 30
+HIGH_DOSHA_THRESHOLD    = 40
+EXTREME_DOSHA_THRESHOLD = 60
+TRIDOSHIC_DIFF_LIMIT    = 15
+DUAL_DOSHA_DIFF_LIMIT   = 10
+SYMPTOM_PENALTY         = 5
+
+
+# ─── SCORING ─────────────────────────────────────────────────────────────────
+
+def calculate_hybrid_dosha_scores(answers, symptoms):
     scores = {'vata': 0.0, 'pitta': 0.0, 'kapha': 0.0}
 
     question_weights = {
-        'bodyFrame': 1.5,
-        'skinType': 1.3,
-        'hairType': 1.0,
-        'weightPattern': 1.4,
-        'appetite': 1.2,
-        'digestion': 1.5,
-        'thirst': 1.0,
-        'mindState': 1.4,
-        'sleepPattern': 1.3,
+        'bodyFrame': 1.5, 'skinType': 1.3, 'hairType': 1.0,
+        'weightPattern': 1.4, 'appetite': 1.2, 'digestion': 1.5,
+        'thirst': 1.0, 'mindState': 1.4, 'sleepPattern': 1.3,
         'climatePreference': 1.1
     }
 
@@ -51,30 +57,25 @@ def calculate_advanced_dosha_scores(answers, symptoms):
 
 def calculate_wellness_score(percentages, symptoms):
     score = 100
-
     sorted_percentages = sorted(percentages.values(), reverse=True)
     imbalance = sorted_percentages[0] - sorted_percentages[2]
 
-    if imbalance > 50:
-        score -= 30
-    elif imbalance > 40:
-        score -= 20
-    elif imbalance > 30:
-        score -= 10
-    elif imbalance > 20:
-        score -= 5
+    if imbalance > 50:   score -= 30
+    elif imbalance > 40: score -= 20
+    elif imbalance > 30: score -= 10
+    elif imbalance > 20: score -= 5
 
-    score -= len(symptoms) * 5
+    score -= len(symptoms) * SYMPTOM_PENALTY
 
-    if imbalance <= 15:
+    if imbalance <= TRIDOSHIC_DIFF_LIMIT:
         score += 10
 
     return max(0, min(100, score))
 
 
-# ─── CONSTITUTION ANALYSIS ──────────────────────────────────────────────────
+# ─── CONSTITUTION ─────────────────────────────────────────────────────────────
 
-def analyze_constitution(percentages):
+def analyze_constitution_advanced(percentages):
     sorted_doshas = sorted(percentages.items(), key=lambda x: x[1], reverse=True)
     dominant  = sorted_doshas[0][0].capitalize()
     secondary = sorted_doshas[1][0].capitalize()
@@ -82,9 +83,9 @@ def analyze_constitution(percentages):
     max_diff    = sorted_doshas[0][1] - sorted_doshas[1][1]
     second_diff = sorted_doshas[1][1] - sorted_doshas[2][1]
 
-    if max_diff <= 15 and second_diff <= 15:
+    if max_diff <= TRIDOSHIC_DIFF_LIMIT and second_diff <= TRIDOSHIC_DIFF_LIMIT:
         constitution_type = "Balanced Tridoshic"
-    elif max_diff <= 10:
+    elif max_diff <= DUAL_DOSHA_DIFF_LIMIT:
         constitution_type = f"{dominant}-{secondary}"
     else:
         constitution_type = f"{dominant} Dominant"
@@ -97,479 +98,337 @@ def analyze_constitution(percentages):
     }
 
 
-# ─── YOGA SEQUENCES ─────────────────────────────────────────────────────────
+# ─── YOGA SEQUENCES ──────────────────────────────────────────────────────────
 
 def get_vata_yoga_sequence():
     return [
-        {
-            'name': 'Balasana (Child Pose)',
-            'description': 'Grounding forward fold',
-            'benefit': 'Calms nervous system',
-            'energy': 'Grounding',
-            'imagePath': '/images/yoga/balasana.jpg'
-        },
-        {
-            'name': 'Tadasana (Mountain Pose)',
-            'description': 'Standing foundation',
-            'benefit': 'Grounds energy',
-            'energy': 'Stabilizing',
-            'imagePath': '/images/yoga/tadasana.jpg'
-        },
-        {
-            'name': 'Viparita Karani',
-            'description': 'Legs up wall',
-            'benefit': 'Calms Vata',
-            'energy': 'Restorative',
-            'imagePath': '/images/yoga/viparita-karani.jpg'
-        }
+        {'name': 'Balasana (Child Pose)',    'description': 'Grounding forward fold', 'benefit': 'Calms nervous system', 'energy': 'Grounding',   'imagePath': '/images/yoga/balasana.jpg'},
+        {'name': 'Tadasana (Mountain Pose)', 'description': 'Standing foundation',    'benefit': 'Grounds energy',       'energy': 'Stabilizing', 'imagePath': '/images/yoga/tadasana.jpg'},
+        {'name': 'Viparita Karani',          'description': 'Legs up wall',           'benefit': 'Calms Vata',           'energy': 'Restorative', 'imagePath': '/images/yoga/viparita-karani.jpg'}
     ]
-
 
 def get_pitta_yoga_sequence():
     return [
-        {
-            'name': 'Chandra Namaskar',
-            'description': 'Moon salutation',
-            'benefit': 'Cooling flow',
-            'energy': 'Cooling',
-            'imagePath': '/images/yoga/chandra-namaskar.jpg'
-        },
-        {
-            'name': 'Matsyasana',
-            'description': 'Fish pose',
-            'benefit': 'Opens heart',
-            'energy': 'Heart-opening',
-            'imagePath': '/images/yoga/matsyasana.jpg'
-        },
-        {
-            'name': 'Shavasana',
-            'description': 'Corpse pose',
-            'benefit': 'Deep relaxation',
-            'energy': 'Peaceful',
-            'imagePath': '/images/yoga/shavasana.jpg'
-        }
+        {'name': 'Chandra Namaskar', 'description': 'Moon salutation', 'benefit': 'Cooling flow',    'energy': 'Cooling',       'imagePath': '/images/yoga/chandra-namaskar.jpg'},
+        {'name': 'Matsyasana',       'description': 'Fish pose',       'benefit': 'Opens heart',      'energy': 'Heart-opening', 'imagePath': '/images/yoga/matsyasana.jpg'},
+        {'name': 'Shavasana',        'description': 'Corpse pose',     'benefit': 'Deep relaxation',  'energy': 'Peaceful',      'imagePath': '/images/yoga/shavasana.jpg'}
     ]
-
 
 def get_kapha_yoga_sequence():
     return [
-        {
-            'name': 'Surya Namaskar',
-            'description': 'Sun salutation',
-            'benefit': 'Energizes body',
-            'energy': 'Heating',
-            'imagePath': '/images/yoga/surya-namaskar.jpg'
-        },
-        {
-            'name': 'Virabhadrasana',
-            'description': 'Warrior pose',
-            'benefit': 'Builds strength',
-            'energy': 'Empowering',
-            'imagePath': '/images/yoga/virabhadrasana.jpg'
-        },
-        {
-            'name': 'Kapalbhati',
-            'description': 'Skull-shining breath',
-            'benefit': 'Clears congestion',
-            'energy': 'Stimulating',
-            'imagePath': '/images/yoga/kapalbhati.jpg'
-        }
+        {'name': 'Surya Namaskar', 'description': 'Sun salutation',       'benefit': 'Energizes body',   'energy': 'Heating',     'imagePath': '/images/yoga/surya-namaskar.jpg'},
+        {'name': 'Virabhadrasana', 'description': 'Warrior pose',         'benefit': 'Builds strength',  'energy': 'Empowering',  'imagePath': '/images/yoga/virabhadrasana.jpg'},
+        {'name': 'Kapalbhati',     'description': 'Skull-shining breath', 'benefit': 'Clears congestion','energy': 'Stimulating', 'imagePath': '/images/yoga/kapalbhati.jpg'}
     ]
 
 
-def get_balanced_yoga_sequence():
-    return [
-        {
-            'name': 'Surya Namaskar (moderate pace)',
-            'description': 'Balanced sun salutation',
-            'benefit': 'Warms and energizes moderately',
-            'energy': 'Balanced',
-            'imagePath': '/images/yoga/surya-namaskar.jpg'
-        },
-        {
-            'name': 'Standing poses (Warrior series)',
-            'description': 'Balanced strength building',
-            'benefit': 'Builds stability and strength',
-            'energy': 'Grounding',
-            'imagePath': '/images/yoga/virabhadrasana.jpg'
-        },
-        {
-            'name': 'Gentle twists',
-            'description': 'Spinal rotation',
-            'benefit': 'Detoxifies and balances',
-            'energy': 'Cleansing',
-            'imagePath': '/images/yoga/ardha-matsyendrasana.jpg'
-        },
-        {
-            'name': 'Shavasana',
-            'description': 'Final relaxation',
-            'benefit': 'Integrates practice',
-            'energy': 'Peaceful',
-            'imagePath': '/images/yoga/shavasana.jpg'
-        }
+# ─── ANALYSIS GENERATORS ─────────────────────────────────────────────────────
+
+def generate_physical_analysis_hybrid(vata, pitta, kapha, active_doshas, symptoms):
+    parts = []
+
+    for dosha, pct in active_doshas:
+        if dosha == 'vata':
+            if pct >= EXTREME_DOSHA_THRESHOLD:
+                parts.append(f"Extreme Vata dominance ({pct}%) creates significant dryness, coldness, and nervous system sensitivity")
+            elif pct >= HIGH_DOSHA_THRESHOLD:
+                parts.append(f"High Vata ({pct}%) contributes to variable energy, dryness, and cold sensitivity")
+            elif pct >= ACTIVE_DOSHA_THRESHOLD:
+                parts.append(f"Moderate Vata ({pct}%) adds movement and variability to your constitution")
+
+        if dosha == 'pitta':
+            if pct >= EXTREME_DOSHA_THRESHOLD:
+                parts.append(f"Extreme Pitta dominance ({pct}%) generates intense internal heat and inflammatory tendencies")
+            elif pct >= HIGH_DOSHA_THRESHOLD:
+                parts.append(f"High Pitta ({pct}%) creates strong metabolism, heat, and sharp appetite")
+            elif pct >= ACTIVE_DOSHA_THRESHOLD:
+                parts.append(f"Moderate Pitta ({pct}%) adds warmth and metabolic fire")
+
+        if dosha == 'kapha':
+            if pct >= EXTREME_DOSHA_THRESHOLD:
+                parts.append(f"Extreme Kapha dominance ({pct}%) leads to heaviness, congestion, and slow metabolism")
+            elif pct >= HIGH_DOSHA_THRESHOLD:
+                parts.append(f"High Kapha ({pct}%) provides stability but can create sluggishness and weight gain tendency")
+            elif pct >= ACTIVE_DOSHA_THRESHOLD:
+                parts.append(f"Moderate Kapha ({pct}%) gives you grounding and endurance")
+
+    if 'Joint Pain'   in symptoms: parts.append("Joint pain indicates Vata aggravation requiring warming, grounding therapies")
+    if 'Congestion'   in symptoms: parts.append("Congestion shows Kapha excess needing stimulation and drying")
+    if 'Acidity'      in symptoms: parts.append("Acidity reveals Pitta imbalance requiring cooling interventions")
+
+    return ". ".join(parts) + "."
+
+
+def generate_emotional_analysis_hybrid(vata, pitta, kapha, active_doshas, symptoms):
+    parts = []
+
+    for dosha, pct in active_doshas:
+        if dosha == 'vata'  and pct >= HIGH_DOSHA_THRESHOLD: parts.append(f"Vata ({pct}%) creates mental activity, creativity, but also anxiety and restlessness")
+        if dosha == 'pitta' and pct >= HIGH_DOSHA_THRESHOLD: parts.append(f"Pitta ({pct}%) brings sharp intellect and drive, but also irritability and perfectionism")
+        if dosha == 'kapha' and pct >= HIGH_DOSHA_THRESHOLD: parts.append(f"Kapha ({pct}%) provides emotional stability, but can lead to attachment and resistance to change")
+
+    if 'Anxiety'     in symptoms: parts.append("Anxiety indicates need for Vata-calming practices")
+    if 'Irritability' in symptoms: parts.append("Irritability shows Pitta excess requiring cooling compassion practices")
+    if 'Fatigue'     in symptoms: parts.append("Fatigue suggests Kapha heaviness needing energizing interventions")
+
+    return ". ".join(parts) + "."
+
+
+def generate_digestive_analysis_hybrid(vata, pitta, kapha, active_doshas, symptoms):
+    parts = []
+
+    for dosha, pct in active_doshas:
+        if dosha == 'vata'  and pct >= HIGH_DOSHA_THRESHOLD: parts.append("Vata creates irregular appetite with gas and bloating tendency")
+        if dosha == 'pitta' and pct >= HIGH_DOSHA_THRESHOLD: parts.append("Pitta generates strong appetite with acidic and inflammatory tendencies")
+        if dosha == 'kapha' and pct >= HIGH_DOSHA_THRESHOLD: parts.append("Kapha slows digestion with heaviness and sluggish metabolism")
+
+    if 'Acidity'    in symptoms: parts.append("Acidity requires cooling foods and avoiding spicy/sour items")
+    if 'Bloating'   in symptoms: parts.append("Bloating indicates need for warm, well-cooked foods at regular times")
+    if 'Congestion' in symptoms: parts.append("Digestive congestion needs light, stimulating foods")
+
+    return ". ".join(parts) + "."
+
+
+def generate_sleep_analysis_hybrid(vata, pitta, kapha, active_doshas, symptoms):
+    parts = []
+
+    for dosha, pct in active_doshas:
+        if dosha == 'vata'  and pct >= HIGH_DOSHA_THRESHOLD: parts.append("Vata creates light, interrupted sleep with difficulty falling asleep")
+        if dosha == 'pitta' and pct >= HIGH_DOSHA_THRESHOLD: parts.append("Pitta may cause vivid dreams and waking due to mental intensity")
+        if dosha == 'kapha' and pct >= HIGH_DOSHA_THRESHOLD: parts.append("Kapha brings heavy sleep with tendency to oversleep")
+
+    if 'Insomnia' in symptoms: parts.append("Insomnia requires calming bedtime routine and nervous system support")
+
+    return ". ".join(parts) + "."
+
+
+# ─── WEIGHTED RECOMMENDATION GENERATORS ──────────────────────────────────────
+
+def generate_weighted_foods_prefer(active_doshas, symptoms):
+    vata_foods  = ['Warm soups and stews', 'Cooked root vegetables', 'Ghee and healthy oils', 'Warm milk with spices', 'Oatmeal with cinnamon', 'Rice and quinoa', 'Soaked nuts']
+    pitta_foods = ['Cooling cucumbers and melons', 'Sweet fruits (grapes, pears)', 'Coconut products', 'Leafy greens', 'Mint and cilantro', 'Basmati rice', 'Cooling spices (coriander, fennel)']
+    kapha_foods = ['Light, warm foods', 'Stimulating spices (ginger, pepper)', 'Bitter greens', 'Beans and lentils', 'Apples and pears', 'Light grains (barley, millet)']
+
+    dosha_map = {'vata': vata_foods, 'pitta': pitta_foods, 'kapha': kapha_foods}
+    foods, seen = [], set()
+
+    for dosha, pct in active_doshas:
+        count = 7 if pct >= EXTREME_DOSHA_THRESHOLD else 5 if pct >= HIGH_DOSHA_THRESHOLD else 3
+        for food in dosha_map[dosha][:count]:
+            if food not in seen:
+                foods.append(food)
+                seen.add(food)
+
+    if 'Acidity'  in symptoms and 'Cooling cucumbers and melons' not in seen: foods.insert(0, 'Cooling cucumbers and melons')
+    if 'Congestion' in symptoms and 'Stimulating spices (ginger, pepper)' not in seen: foods.insert(0, 'Stimulating spices (ginger, pepper)')
+    if 'Anxiety'  in symptoms and 'Warm milk with spices' not in seen: foods.insert(0, 'Warm milk with spices')
+
+    return remove_contradictions_foods(foods)
+
+
+def generate_weighted_foods_avoid(active_doshas, symptoms):
+    vata_avoid  = ['Cold foods', 'Raw vegetables', 'Dry snacks', 'Carbonated drinks']
+    pitta_avoid = ['Spicy foods', 'Sour foods', 'Alcohol', 'Fried foods']
+    kapha_avoid = ['Heavy oily foods', 'Dairy products', 'Sweets', 'Cold drinks']
+
+    dosha_map = {'vata': vata_avoid, 'pitta': pitta_avoid, 'kapha': kapha_avoid}
+    foods, seen = [], set()
+
+    for dosha, pct in active_doshas:
+        if pct >= HIGH_DOSHA_THRESHOLD:
+            for food in dosha_map[dosha]:
+                if food not in seen:
+                    foods.append(food)
+                    seen.add(food)
+
+    if 'Acidity'    in symptoms and 'Spicy foods'     not in seen: foods.insert(0, 'Spicy foods')
+    if 'Congestion' in symptoms and 'Dairy products'  not in seen: foods.insert(0, 'Dairy products')
+
+    return foods
+
+
+def generate_weighted_herbs(active_doshas, symptoms):
+    vata_herbs  = ['Ashwagandha - nervous system support', 'Ginger - warming digestion', 'Brahmi - calms mind']
+    pitta_herbs = ['Brahmi - cooling clarity', 'Shatavari - cooling support', 'Coriander - digestive cooling']
+    kapha_herbs = ['Trikatu - digestive fire', 'Tulsi - energizing', 'Ginger - warming stimulation']
+
+    dosha_map = {'vata': vata_herbs, 'pitta': pitta_herbs, 'kapha': kapha_herbs}
+    herbs, seen = [], set()
+
+    for dosha, pct in active_doshas:
+        if pct >= HIGH_DOSHA_THRESHOLD:
+            for herb in dosha_map[dosha]:
+                if herb not in seen:
+                    herbs.append(herb)
+                    seen.add(herb)
+
+    if 'Anxiety'  in symptoms: herbs.insert(0, 'Ashwagandha - anxiety relief')
+    if 'Insomnia' in symptoms: herbs.insert(0, 'Brahmi - sleep support')
+
+    return herbs
+
+
+def generate_weighted_drinks(active_doshas, symptoms):
+    vata_drinks  = ['Warm ginger tea', 'Warm milk with nutmeg', 'Chamomile tea']
+    pitta_drinks = ['Coconut water', 'Mint tea', 'Coriander tea']
+    kapha_drinks = ['Ginger tea', 'Warm water with lemon', 'Tulsi tea']
+
+    dosha_map = {'vata': vata_drinks, 'pitta': pitta_drinks, 'kapha': kapha_drinks}
+    drinks, seen = [], set()
+
+    for dosha, pct in active_doshas:
+        if pct >= HIGH_DOSHA_THRESHOLD:
+            for drink in dosha_map[dosha]:
+                if drink not in seen:
+                    drinks.append(drink)
+                    seen.add(drink)
+
+    return drinks
+
+
+def generate_weighted_yoga(active_doshas, symptoms):
+    primary = active_doshas[0][0] if active_doshas else 'vata'
+    return {'vata': get_vata_yoga_sequence, 'pitta': get_pitta_yoga_sequence, 'kapha': get_kapha_yoga_sequence}[primary]()
+
+
+def generate_weighted_lifestyle(active_doshas, symptoms):
+    vata_tips  = ['Maintain regular daily routine', 'Practice oil massage regularly', 'Create warm, cozy environment', 'Avoid excessive stimulation']
+    pitta_tips = ['Practice moderation in all activities', 'Avoid excessive heat', 'Take regular breaks', 'Practice patience and compassion']
+    kapha_tips = ['Exercise daily - vigorous intensity', 'Wake early consistently', 'Seek variety and new experiences', 'Stay active throughout day']
+
+    dosha_map = {'vata': vata_tips, 'pitta': pitta_tips, 'kapha': kapha_tips}
+    tips, seen = [], set()
+
+    for dosha, pct in active_doshas:
+        if pct >= HIGH_DOSHA_THRESHOLD:
+            for tip in dosha_map[dosha]:
+                if tip not in seen:
+                    tips.append(tip)
+                    seen.add(tip)
+
+    return tips
+
+
+def generate_weighted_morning(active_doshas, symptoms):
+    vata_morning  = ['Wake at 6:00 AM', 'Warm oil self-massage', 'Gentle grounding yoga', 'Meditation practice', 'Warm nourishing breakfast']
+    pitta_morning = ['Wake at 5:30 AM', 'Drink cool water', 'Cooling pranayama', 'Moderate exercise', 'Cool shower']
+    kapha_morning = ['Wake at 5:00 AM or earlier', 'Warm water with lemon and ginger', 'Vigorous exercise (45+ minutes)', 'Stimulating breathwork', 'Light or skip breakfast']
+
+    dosha_map = {'vata': vata_morning, 'pitta': pitta_morning, 'kapha': kapha_morning}
+    routine, seen = [], set()
+
+    for dosha, pct in active_doshas:
+        if pct >= HIGH_DOSHA_THRESHOLD:
+            for item in dosha_map[dosha]:
+                if item not in seen:
+                    routine.append(item)
+                    seen.add(item)
+
+    return routine
+
+
+def generate_weighted_night(active_doshas, symptoms):
+    vata_night  = ['Light dinner by 7:00 PM', 'Warm bath', 'Gentle restorative yoga', 'Warm milk with nutmeg', 'In bed by 10:00 PM']
+    pitta_night = ['Light dinner by 6:30 PM', 'Cool shower', 'Cooling yoga sequence', 'Avoid work after 8:00 PM', 'Sleep in cool room']
+    kapha_night = ['Light dinner before 6:00 PM', 'Evening walk or activity', 'Avoid late snacking', 'Hot stimulating shower', 'Aim for 6-7 hours sleep only']
+
+    dosha_map = {'vata': vata_night, 'pitta': pitta_night, 'kapha': kapha_night}
+    routine, seen = [], set()
+
+    for dosha, pct in active_doshas:
+        if pct >= HIGH_DOSHA_THRESHOLD:
+            for item in dosha_map[dosha]:
+                if item not in seen:
+                    routine.append(item)
+                    seen.add(item)
+
+    if 'Insomnia' in symptoms:
+        routine.insert(0, 'Calming bedtime routine essential')
+
+    return routine
+
+
+def generate_weighted_stress(active_doshas, symptoms):
+    vata_stress  = ['Alternate nostril breathing (Nadi Shodhana)', 'Grounding meditation', 'Journaling thoughts', 'Nature walks daily']
+    pitta_stress = ['Cooling breath (Sitali)', 'Forgiveness meditation', 'Creative pursuits', 'Compassion practice']
+    kapha_stress = ['Energizing breathwork (Kapalabhati)', 'Dynamic meditation', 'New challenges', 'Social engagement']
+
+    dosha_map = {'vata': vata_stress, 'pitta': pitta_stress, 'kapha': kapha_stress}
+    practices, seen = [], set()
+
+    for dosha, pct in active_doshas:
+        if pct >= HIGH_DOSHA_THRESHOLD:
+            for practice in dosha_map[dosha]:
+                if practice not in seen:
+                    practices.append(practice)
+                    seen.add(practice)
+
+    if 'Anxiety' in symptoms:
+        practices.insert(0, 'Deep breathing exercises essential')
+
+    return practices
+
+
+# ─── CONTRADICTION FILTER ────────────────────────────────────────────────────
+
+def remove_contradictions_foods(foods):
+    contradictions = [
+        ('Cold foods', 'Warm soups'),
+        ('Spicy foods', 'Cooling cucumbers'),
+        ('Heavy oily foods', 'Light, warm foods')
     ]
+    filtered = []
+    for food in foods:
+        should_add = True
+        for pair in contradictions:
+            if pair[0] in food and any(pair[1] in f for f in filtered):
+                should_add = False
+                break
+        if should_add:
+            filtered.append(food)
+    return filtered
 
 
-# ─── RECOMMENDATIONS ────────────────────────────────────────────────────────
+# ─── RECOMMENDATION ORCHESTRATOR ─────────────────────────────────────────────
 
-def generate_dynamic_recommendations(percentages, constitution, symptoms):
+def generate_hybrid_recommendations(percentages, constitution, symptoms, answers):
     vata  = percentages['vata']
     pitta = percentages['pitta']
     kapha = percentages['kapha']
 
-    dominant         = constitution['dominant'].lower()
-    constitution_type = constitution['type']
+    active_doshas = sorted(
+        [(d, p) for d, p in [('vata', vata), ('pitta', pitta), ('kapha', kapha)] if p >= ACTIVE_DOSHA_THRESHOLD],
+        key=lambda x: x[1], reverse=True
+    )
 
-    rec = {
-        'physical_analysis':  '',
-        'emotional_analysis': '',
-        'digestive_analysis': '',
-        'sleep_analysis':     '',
-        'foods_prefer':       [],
-        'foods_avoid':        [],
-        'herbs':              [],
-        'drinks':             [],
-        'yoga':               [],
-        'lifestyle_tips':     [],
-        'morning_routine':    [],
-        'night_routine':      [],
-        'stress_management':  []
+    return {
+        'physical_analysis':  generate_physical_analysis_hybrid(vata, pitta, kapha, active_doshas, symptoms),
+        'emotional_analysis': generate_emotional_analysis_hybrid(vata, pitta, kapha, active_doshas, symptoms),
+        'digestive_analysis': generate_digestive_analysis_hybrid(vata, pitta, kapha, active_doshas, symptoms),
+        'sleep_analysis':     generate_sleep_analysis_hybrid(vata, pitta, kapha, active_doshas, symptoms),
+        'foods_prefer':       generate_weighted_foods_prefer(active_doshas, symptoms),
+        'foods_avoid':        generate_weighted_foods_avoid(active_doshas, symptoms),
+        'herbs':              generate_weighted_herbs(active_doshas, symptoms),
+        'drinks':             generate_weighted_drinks(active_doshas, symptoms),
+        'yoga':               generate_weighted_yoga(active_doshas, symptoms),
+        'lifestyle_tips':     generate_weighted_lifestyle(active_doshas, symptoms),
+        'morning_routine':    generate_weighted_morning(active_doshas, symptoms),
+        'night_routine':      generate_weighted_night(active_doshas, symptoms),
+        'stress_management':  generate_weighted_stress(active_doshas, symptoms),
     }
 
-    # ── VATA ──────────────────────────────────────────────────────────────
-    if vata > 60:
-        rec['physical_analysis']  = "Your constitution shows extreme Vata dominance, indicating significant nervous system imbalance. You may experience pronounced dryness, coldness, irregular digestion, and variable energy levels. Your body craves warmth, stability, and grounding. Joint crackling, cold extremities, and thin build are common manifestations."
-        rec['emotional_analysis'] = "High Vata creates mental restlessness, racing thoughts, anxiety, fear, and overwhelm. You may struggle with focus, experience worry about the future, and feel scattered or ungrounded. Creative but easily overstimulated. Need practices that calm the nervous system."
-        rec['digestive_analysis'] = "Irregular appetite with tendency toward gas, bloating, constipation, and dry digestion. Your digestive fire (Agni) is erratic - sometimes strong, sometimes weak. You need warm, moist, well-cooked foods eaten at regular times to stabilize digestion."
-        rec['sleep_analysis']     = "Light, interrupted sleep with difficulty falling asleep and staying asleep. You wake easily from noise or thoughts. May experience insomnia, especially between 2-6 AM (Vata time). Need calming bedtime routine and nervous system support."
-        rec['foods_prefer'] = [
-            'Warm soups and stews',
-            'Cooked root vegetables (sweet potato, carrots, beets)',
-            'Warm milk with cardamom and honey',
-            'Ghee (clarified butter)',
-            'Oatmeal with cinnamon',
-            'Ripe bananas and mangoes',
-            'Rice and quinoa',
-            'Nuts soaked overnight (almonds, walnuts)',
-            'Warm herbal teas',
-            'Cooked greens with oil'
-        ]
-        rec['foods_avoid'] = [
-            'Cold or frozen foods', 'Dry crackers and chips',
-            'Raw vegetables (especially cruciferous)', 'Beans (except mung dal)',
-            'Carbonated drinks', 'Excessive caffeine',
-            'Leftover or reheated food', 'White sugar'
-        ]
-        rec['herbs'] = [
-            'Ashwagandha - nervous system support and grounding',
-            'Brahmi - calms mind and improves focus',
-            'Shatavari - nourishing and moistening',
-            'Ginger - warming digestive support',
-            'Licorice root - soothing and grounding'
-        ]
-        rec['drinks'] = [
-            'Warm ginger tea', 'Cinnamon and cardamom tea',
-            'Warm milk with nutmeg', 'CCF tea (cumin, coriander, fennel)',
-            'Chamomile tea before bed'
-        ]
-        rec['yoga'] = [
-            {'name': 'Balasana (Child Pose)',             'description': 'Grounding forward fold',          'benefit': 'Calms nervous system and reduces anxiety',           'energy': 'Deeply grounding and soothing',  'imagePath': '/images/yoga/balasana.jpg'},
-            {'name': 'Tadasana (Mountain Pose)',           'description': 'Standing foundation pose',        'benefit': 'Grounds energy into earth, improves stability',      'energy': 'Centering and stabilizing',      'imagePath': '/images/yoga/tadasana.jpg'},
-            {'name': 'Viparita Karani (Legs Up Wall)',     'description': 'Gentle inversion',                'benefit': 'Reverses downward flow of Vata, deeply calming',     'energy': 'Restorative and peaceful',       'imagePath': '/images/yoga/viparita-karani.jpg'},
-            {'name': 'Paschimottanasana (Seated Forward Bend)', 'description': 'Calming forward fold',      'benefit': 'Soothes nervous system, aids digestion',             'energy': 'Introspective and grounding',    'imagePath': '/images/yoga/paschimottanasana.jpg'},
-            {'name': 'Sukhasana with Pranayama',           'description': 'Easy seated pose with slow breathing', 'benefit': 'Regulates breath, calms anxiety',              'energy': 'Meditative and stabilizing',     'imagePath': '/images/yoga/sukhasana.jpg'}
-        ]
-        rec['lifestyle_tips'] = [
-            'Establish strict daily routine - wake, eat, and sleep at same times',
-            'Practice daily oil massage (Abhyanga) with warm sesame oil',
-            'Avoid excessive travel, noise, and overstimulation',
-            'Create warm, cozy living environment',
-            'Limit screen time, especially before bed',
-            'Engage in gentle, grounding exercises (no intense cardio)',
-            'Spend time in nature, practice earthing (barefoot walking)',
-            'Reduce multitasking - focus on one thing at a time'
-        ]
-        rec['stress_management'] = [
-            'Practice Nadi Shodhana (alternate nostril breathing) - 5 minutes twice daily',
-            'Grounding meditation focusing on root chakra',
-            'Journaling to organize scattered thoughts',
-            'Spend 20 minutes in nature daily',
-            'Avoid stimulating news and social media',
-            'Create predictable, safe environments',
-            'Practice saying no to overcommitment'
-        ]
 
-    elif vata >= 40:
-        rec['physical_analysis']  = "Moderate to high Vata indicates tendency toward dryness, coldness, and variable energy. You may experience occasional digestive irregularity, dry skin, and sensitivity to cold weather. Your body benefits from routine, warmth, and nourishment."
-        rec['emotional_analysis'] = "Elevated Vata brings quick thinking, creativity, but also tendency toward worry and restlessness. You may experience occasional anxiety or scattered focus. Need grounding practices to balance mental activity."
-        rec['digestive_analysis'] = "Variable appetite and digestion with tendency toward gas and bloating. Benefit from regular meal times and warm, cooked foods that are easy to digest."
-        rec['sleep_analysis']     = "Sleep quality may be inconsistent. You benefit from calming evening routine and avoiding stimulation before bed. May wake during Vata hours (2-6 AM)."
-        rec['foods_prefer'] = ['Warm, cooked vegetables', 'Soups and stews', 'Rice and oatmeal', 'Ghee and healthy oils', 'Sweet fruits (ripe)', 'Warm milk drinks', 'Nuts (soaked)', 'Root vegetables']
-        rec['foods_avoid']  = ['Cold foods and drinks', 'Raw vegetables', 'Dry snacks', 'Excessive caffeine', 'Carbonated beverages']
-        rec['herbs']        = ['Ashwagandha - calming and nourishing', 'Ginger - digestive warmth', 'Cardamom - warming and settling']
-        rec['drinks']       = ['Warm ginger tea', 'Warm milk with spices', 'Herbal teas (chamomile, tulsi)']
-        rec['yoga']         = get_vata_yoga_sequence()
-
-    # ── PITTA ─────────────────────────────────────────────────────────────
-    elif pitta > 60:
-        rec['physical_analysis']  = "Your constitution shows extreme Pitta dominance, indicating significant internal heat and metabolic intensity. You may experience inflammatory conditions, acidity, skin sensitivity, premature greying, and strong body heat. Your body craves cooling, calming, and soothing influences."
-        rec['emotional_analysis'] = "High Pitta creates intense drive, perfectionism, irritability, anger, and impatience. You may be highly critical of self and others, competitive, and struggle with letting go. Sharp intellect but prone to burnout. Need practices that cool emotional intensity."
-        rec['digestive_analysis'] = "Strong, sharp appetite with tendency toward acidity, heartburn, loose stools, and inflammatory gut conditions. Your digestive fire (Agni) is intense and burns hot. You need cooling foods and to avoid spicy, acidic, or fermented foods."
-        rec['sleep_analysis']     = "Moderate sleep needs but may struggle with falling asleep due to mental intensity. Dreams may be vivid, intense, or disturbing. Wake during Pitta hours (10 PM-2 AM) if stressed. Need cooling evening routine."
-        rec['foods_prefer'] = [
-            'Cooling cucumbers and melons', 'Sweet fruits (grapes, pears, apples)',
-            'Coconut in all forms', 'Leafy greens and salads',
-            'Cilantro and mint', 'Sweet and bitter vegetables',
-            'Basmati rice', 'Mung beans and lentils',
-            'Ghee (in moderation)', 'Cooling spices (coriander, fennel, cardamom)'
-        ]
-        rec['foods_avoid'] = [
-            'Spicy foods (chili, cayenne, black pepper)', 'Sour foods (yogurt, vinegar, citrus)',
-            'Fermented foods', 'Red meat', 'Alcohol',
-            'Caffeine (especially coffee)', 'Fried and oily foods',
-            'Garlic and onions (raw)', 'Tomatoes and eggplant', 'Salty foods'
-        ]
-        rec['herbs']  = ['Brahmi - cools mind and supports clarity', 'Shatavari - cooling and soothing', 'Neem - blood purifying and cooling', 'Amalaki - cooling digestive support', 'Coriander - cooling and digestive']
-        rec['drinks'] = ['Coconut water', 'Mint tea (cool or room temperature)', 'Coriander tea', 'Aloe vera juice', 'Rose water drinks', 'Fennel tea']
-        rec['yoga'] = [
-            {'name': 'Chandra Namaskar (Moon Salutation)', 'description': 'Cooling flow sequence',       'benefit': 'Reduces internal heat and calms fiery energy', 'energy': 'Cooling and receptive',    'imagePath': '/images/yoga/chandra-namaskar.jpg'},
-            {'name': 'Matsyasana (Fish Pose)',              'description': 'Heart-opening backbend',      'benefit': 'Releases tension and opens to compassion',     'energy': 'Heart-centered and cooling', 'imagePath': '/images/yoga/matsyasana.jpg'},
-            {'name': 'Shavasana (Corpse Pose)',             'description': 'Complete relaxation pose',    'benefit': 'Deep cooling relaxation, releases perfectionism', 'energy': 'Surrendering and peaceful', 'imagePath': '/images/yoga/shavasana.jpg'},
-            {'name': 'Ardha Matsyendrasana (Seated Twist)', 'description': 'Gentle spinal twist',        'benefit': 'Detoxifies liver and cools digestive system',   'energy': 'Cleansing and balancing',  'imagePath': '/images/yoga/ardha-matsyendrasana.jpg'},
-            {'name': 'Sitali Pranayama (Cooling Breath)',   'description': 'Tongue-rolled breathing',    'benefit': 'Directly cools body temperature and mind',     'energy': 'Intensely cooling',        'imagePath': '/images/yoga/sitali.jpg'}
-        ]
-        rec['lifestyle_tips'] = [
-            'Avoid excessive heat - stay in cool environments',
-            'Practice moderation in all activities (avoid overworking)',
-            'Engage in cooling activities like swimming',
-            'Avoid competitive situations and arguments',
-            'Practice patience and compassion toward self and others',
-            'Take regular breaks from work and intensity',
-            'Spend time near water (ocean, lakes, rivers)',
-            'Avoid intense exercise during hottest part of day'
-        ]
-        rec['stress_management'] = [
-            'Practice Sitali or Sitkari pranayama (cooling breath) - 10 minutes daily',
-            'Moon gazing meditation for cooling effect',
-            'Practice forgiveness and letting go exercises',
-            'Engage in creative pursuits without judgment',
-            'Avoid checking emails or work late at night',
-            'Practice compassion meditation (Metta)',
-            'Take cooling walks in nature during evening'
-        ]
-
-    elif pitta >= 40:
-        rec['physical_analysis']  = "Moderate to high Pitta indicates strong metabolism and internal heat. You may experience occasional acidity, skin sensitivity, and strong appetite. Your body benefits from cooling practices and moderation."
-        rec['emotional_analysis'] = "Elevated Pitta brings sharp intellect and drive but also tendency toward irritability and perfectionism. You may push yourself too hard. Need cooling and compassionate practices."
-        rec['digestive_analysis'] = "Strong appetite with tendency toward acidity and heat in digestion. Benefit from cooling foods and avoiding spicy, sour, or fermented items."
-        rec['sleep_analysis']     = "Generally good sleep but may struggle when stressed or overheated. Benefit from cool sleeping environment and calming evening routine."
-        rec['foods_prefer'] = ['Cooling vegetables (cucumber, zucchini)', 'Sweet fruits', 'Coconut products', 'Leafy greens', 'Mint and cilantro', 'Basmati rice', 'Cooling spices']
-        rec['foods_avoid']  = ['Spicy foods', 'Sour foods', 'Alcohol', 'Excessive caffeine', 'Fried foods']
-        rec['herbs']        = ['Brahmi - mental cooling', 'Shatavari - soothing', 'Coriander - digestive cooling']
-        rec['drinks']       = ['Coconut water', 'Mint tea', 'Aloe vera juice']
-        rec['yoga']         = get_pitta_yoga_sequence()
-
-    # ── KAPHA ─────────────────────────────────────────────────────────────
-    elif kapha > 60:
-        rec['physical_analysis']  = "Your constitution shows extreme Kapha dominance, indicating significant tendency toward heaviness, congestion, and sluggish metabolism. You may experience weight gain, water retention, excess mucus, lethargy, and slow digestion. Your body craves stimulation, movement, and lightness."
-        rec['emotional_analysis'] = "High Kapha creates attachment, resistance to change, depression, lethargy, and emotional heaviness. You may struggle with motivation, oversleep, and resist new experiences. Stable and loyal but can become stuck. Need practices that energize and inspire."
-        rec['digestive_analysis'] = "Slow, heavy digestion with tendency toward weight gain, sluggish metabolism, and mucus formation. Your digestive fire (Agni) is weak and slow. You need light, warm, stimulating foods and may benefit from occasional fasting."
-        rec['sleep_analysis']     = "Heavy, prolonged sleep with difficulty waking. You may oversleep, nap during day, and still feel groggy. Sleep more than 8 hours worsens Kapha. Need energizing morning routine and avoid daytime sleep."
-        rec['foods_prefer'] = [
-            'Light, warm, dry foods', 'Pungent spices (ginger, black pepper, cayenne)',
-            'Bitter vegetables (kale, dandelion, arugula)', 'Astringent foods (beans, lentils, pomegranate)',
-            'Apples and pears', 'Barley and millet',
-            'Small amounts of honey (raw, unheated)', 'Garlic and onions',
-            'Cruciferous vegetables', 'Very light breakfast or skip it'
-        ]
-        rec['foods_avoid'] = [
-            'Heavy, oily foods', 'Dairy (especially cheese, ice cream, yogurt)',
-            'Wheat and heavy grains', 'Sweet foods and desserts',
-            'Cold foods and drinks', 'Fried foods',
-            'Red meat', 'Excessive salt',
-            'Bananas and avocados', 'Late night eating'
-        ]
-        rec['herbs']  = ['Trikatu - powerful digestive stimulant (ginger, black pepper, long pepper)', 'Guggul - supports metabolism and weight management', 'Punarnava - reduces water retention', 'Chitrak - kindles digestive fire', 'Tulsi - energizing and clearing']
-        rec['drinks'] = ['Strong ginger tea', 'Black pepper and honey in warm water (morning)', 'Tulsi (holy basil) tea', 'Cinnamon tea', 'Warm water with lemon and cayenne', 'CCF tea (cumin, coriander, fennel) - stimulating blend']
-        rec['yoga'] = [
-            {'name': 'Surya Namaskar (Sun Salutation)', 'description': 'Dynamic flowing sequence',      'benefit': 'Burns Kapha, generates heat, energizes entire body', 'energy': 'Highly energizing and warming', 'imagePath': '/images/yoga/surya-namaskar.jpg'},
-            {'name': 'Virabhadrasana (Warrior Poses)',  'description': 'Standing strength poses',       'benefit': 'Builds stamina, confidence, and burns calories',     'energy': 'Empowering and heating',       'imagePath': '/images/yoga/virabhadrasana.jpg'},
-            {'name': 'Utkatasana (Chair Pose)',          'description': 'Challenging standing pose',    'benefit': 'Strengthens legs, boosts metabolism',               'energy': 'Intense and energizing',       'imagePath': '/images/yoga/utkatasana.jpg'},
-            {'name': 'Navasana (Boat Pose)',             'description': 'Core strengthening pose',      'benefit': 'Ignites digestive fire, strengthens core',           'energy': 'Challenging and activating',   'imagePath': '/images/yoga/navasana.jpg'},
-            {'name': 'Kapalbhati Pranayama',             'description': 'Forceful exhalation breath',   'benefit': 'Clears mucus, energizes body and mind',              'energy': 'Highly stimulating',           'imagePath': '/images/yoga/kapalbhati.jpg'},
-            {'name': 'Bhastrika Pranayama',              'description': 'Bellows breath',               'benefit': 'Generates internal heat, clears congestion',         'energy': 'Powerfully energizing',        'imagePath': '/images/yoga/bhastrika.jpg'}
-        ]
-        rec['lifestyle_tips'] = [
-            'Wake up before 6 AM (before Kapha time increases)',
-            'Engage in vigorous daily exercise - minimum 45 minutes',
-            'Avoid daytime napping entirely',
-            'Seek novelty, variety, and new experiences regularly',
-            'Practice dry brushing before shower to stimulate circulation',
-            'Stay mentally stimulated - learn new skills',
-            'Avoid sedentary behavior - move every hour',
-            'Reduce sleep to 6-7 hours maximum',
-            'Fast one day per week or practice intermittent fasting'
-        ]
-        rec['stress_management'] = [
-            'Practice Kapalabhati (skull-shining breath) - 5 minutes morning',
-            'Engage in dynamic, moving meditation',
-            'Take on new challenges to break routine',
-            'Practice non-attachment exercises',
-            'Vigorous outdoor activities',
-            'Social engagement and stimulating conversations',
-            'Avoid comfort eating - address emotions directly'
-        ]
-
-    elif kapha >= 40:
-        rec['physical_analysis']  = "Moderate to high Kapha indicates tendency toward steady energy but also heaviness and slower metabolism. You may gain weight easily and experience occasional congestion. Your body benefits from regular movement and stimulation."
-        rec['emotional_analysis'] = "Elevated Kapha brings stability and calm but also tendency toward resistance to change and attachment. You may need motivation to start new things. Need energizing and inspiring practices."
-        rec['digestive_analysis'] = "Slow, steady digestion with tendency toward sluggish metabolism. Benefit from light, warm, spiced foods and regular exercise to stimulate digestion."
-        rec['sleep_analysis']     = "Deep, heavy sleep with tendency to oversleep. You wake refreshed but may struggle to get out of bed. Benefit from consistent early wake time."
-        rec['foods_prefer'] = ['Light, warm foods', 'Stimulating spices', 'Bitter greens', 'Beans and lentils', 'Light fruits (apples, pears)', 'Whole grains (barley, millet)']
-        rec['foods_avoid']  = ['Heavy, oily foods', 'Dairy products', 'Sweets and desserts', 'Cold foods', 'Excessive portions']
-        rec['herbs']        = ['Trikatu - digestive stimulant', 'Ginger - warming', 'Tulsi - energizing']
-        rec['drinks']       = ['Ginger tea', 'Warm water with lemon', 'Tulsi tea']
-        rec['yoga']         = get_kapha_yoga_sequence()
-
-    # ── DUAL / TRIDOSHIC ──────────────────────────────────────────────────
-    else:
-        if constitution_type == "Balanced Tridoshic":
-            rec['physical_analysis']  = "Your constitution shows beautiful balance among all three doshas. You have the rare gift of equilibrium, experiencing the best qualities of Vata (creativity), Pitta (drive), and Kapha (stability) in harmony. Maintain this balance through seasonal adjustments and mindful living."
-            rec['emotional_analysis'] = "Emotionally balanced with access to creativity, intelligence, and stability. You adapt well to change while maintaining groundedness. Your challenge is maintaining this balance through life's changes."
-            rec['digestive_analysis'] = "Balanced digestion that adapts well to different foods. Maintain variety in diet while staying mindful of seasonal and environmental changes that may affect one dosha more than others."
-            rec['sleep_analysis']     = "Generally good sleep quality. Maintain consistent sleep schedule and adjust based on seasonal variations."
-
-        elif "Vata-Pitta" in constitution_type:
-            rec['physical_analysis']  = f"Your constitution is Vata-Pitta ({vata}% Vata, {pitta}% Pitta), combining qualities of air/movement with fire/transformation. You experience both dryness and heat, variable energy with intensity. Need practices that ground and cool simultaneously."
-            rec['emotional_analysis'] = "Quick-thinking and driven, but prone to anxiety and irritability when imbalanced. You combine creativity with sharp intellect but can become scattered and intense. Need calming, cooling practices."
-            rec['digestive_analysis'] = "Variable appetite combined with acidic tendency. May experience both gas and heartburn. Need warm but not too spicy foods, eaten at regular times."
-            rec['sleep_analysis']     = "Light to moderate sleep with tendency toward mental activity at night. Need both calming and cooling evening routine."
-
-        elif "Pitta-Kapha" in constitution_type:
-            rec['physical_analysis']  = f"Your constitution is Pitta-Kapha ({pitta}% Pitta, {kapha}% Kapha), combining fire/transformation with earth/stability. You have strong build with good metabolism, but can experience inflammation and congestion. Need practices that cool and lighten."
-            rec['emotional_analysis'] = "Stable and driven with capacity for sustained effort. Can be stubborn or overly intense. Need practices that promote flexibility and coolness."
-            rec['digestive_analysis'] = "Strong appetite with tendency toward both heat and heaviness. Need light, cooling foods that don't slow metabolism."
-            rec['sleep_analysis']     = "Good sleep quality but may struggle with heat or heaviness. Need cool, well-ventilated sleeping environment."
-
-        elif "Vata-Kapha" in constitution_type or "Kapha-Vata" in constitution_type:
-            rec['physical_analysis']  = f"Your constitution combines Vata-Kapha ({vata}% Vata, {kapha}% Kapha), pairing air/movement with earth/stability - seemingly opposite qualities. You may experience alternating dryness and congestion, variable energy and lethargy. Need warming, energizing practices."
-            rec['emotional_analysis'] = "Creative yet stable, but can alternate between anxiety and depression. Need practices that both ground and energize."
-            rec['digestive_analysis'] = "Variable digestion that can be either slow or irregular. Need warm, light foods that are easy to digest."
-            rec['sleep_analysis']     = "May experience either light sleep or heavy sleep depending on which dosha is aggravated. Need consistent routine."
-
-        # Foods for mixed/balanced types
-        if "Vata-Pitta" in constitution_type:
-            rec['foods_prefer'] = ['Warm but not spicy foods', 'Sweet fruits (grapes, melons)', 'Rice and oats', 'Ghee', 'Cooling spices (coriander, fennel)', 'Cooked vegetables (not raw)', 'Coconut', 'Sweet dairy (milk, fresh cheese)']
-            rec['foods_avoid']  = ['Cold, dry foods', 'Very spicy foods', 'Caffeine', 'Raw vegetables', 'Sour foods', 'Alcohol']
-        elif "Pitta-Kapha" in constitution_type:
-            rec['foods_prefer'] = ['Light, cooling vegetables', 'Astringent and bitter tastes', 'Beans and lentils', 'Apples and pears', 'Leafy greens', 'Moderate spices', 'Lean proteins']
-            rec['foods_avoid']  = ['Heavy, oily foods', 'Dairy', 'Very spicy foods', 'Red meat', 'Sweets and desserts', 'Fried foods']
-        elif "Vata-Kapha" in constitution_type or "Kapha-Vata" in constitution_type:
-            rec['foods_prefer'] = ['Warm, light foods', 'Stimulating spices (ginger, pepper)', 'Cooked vegetables', 'Beans and lentils', 'Light grains (quinoa, barley)', 'Apples and pears', 'Warming herbal teas']
-            rec['foods_avoid']  = ['Cold, heavy foods', 'Dairy', 'Wheat', 'Sweets', 'Raw foods', 'Fried foods']
-        elif constitution_type == "Balanced Tridoshic":
-            rec['foods_prefer'] = ['Seasonal, fresh foods', 'Variety of vegetables and fruits', 'Whole grains', 'Moderate use of all six tastes', 'Fresh, home-cooked meals', 'Organic when possible']
-            rec['foods_avoid']  = ['Processed foods', 'Excessive amounts of any one taste', 'Overeating', 'Irregular meal times']
-
-        if not rec['herbs']:
-            rec['herbs'] = ['Triphala - balancing for all doshas', 'Tulsi - adaptogenic', 'Brahmi - mental clarity']
-        if not rec['drinks']:
-            rec['drinks'] = ['CCF tea (cumin, coriander, fennel)', 'Herbal teas based on season', 'Warm water with ginger']
-        if not rec['yoga']:
-            rec['yoga'] = get_balanced_yoga_sequence()
-
-    # ── DAILY ROUTINES ────────────────────────────────────────────────────
-    if dominant == 'vata' or vata > 40:
-        rec['morning_routine'] = [
-            'Wake at 6:00 AM and practice self-massage with warm sesame oil (15 min)',
-            'Gentle yoga or stretching (20 minutes) - focus on grounding poses',
-            'Meditation or pranayama (10 minutes) - Nadi Shodhana',
-            'Warm shower after oil massage',
-            'Eat warm, nourishing breakfast by 8:00 AM (oatmeal, warm milk)',
-            'Set clear intentions for the day to prevent scattered energy'
-        ]
-        rec['night_routine'] = [
-            'Light dinner before 7:00 PM (warm soup or cooked vegetables)',
-            'Evening walk after dinner (15 minutes)',
-            'Warm bath with essential oils (lavender, sandalwood)',
-            'Gentle restorative yoga (15 minutes)',
-            'Foot massage with warm oil',
-            'Warm milk with nutmeg and cardamom',
-            'Journaling to settle thoughts',
-            'In bed by 10:00 PM, read calming content',
-            'Avoid screens 90 minutes before sleep'
-        ]
-    elif dominant == 'pitta' or pitta > 40:
-        rec['morning_routine'] = [
-            'Wake at 5:30 AM before heat of day increases',
-            'Drink room temperature water with aloe or lime',
-            'Cooling pranayama (Sitali) - 10 minutes',
-            'Moderate exercise during cool morning hours',
-            'Cool shower',
-            'Eat cooling breakfast (fruit smoothie, coconut)',
-            'Practice gratitude to counter critical tendencies'
-        ]
-        rec['night_routine'] = [
-            'Light, early dinner by 6:30 PM (cooling foods)',
-            'Evening walk in nature, especially near water',
-            'Cool shower before bed',
-            'Cooling yoga sequence (Moon Salutation)',
-            'Coconut oil scalp massage',
-            'Practice forgiveness meditation',
-            'Avoid work and emails after 8:00 PM',
-            'Sleep in cool, well-ventilated room',
-            'In bed by 10:00 PM'
-        ]
-    elif dominant == 'kapha' or kapha > 40:
-        rec['morning_routine'] = [
-            'Wake at 5:00 AM or earlier (before Kapha time)',
-            'No snoozing - get up immediately',
-            'Drink warm water with lemon and ginger',
-            'Vigorous exercise (45-60 minutes) - cardio, strength training',
-            'Dry brushing before hot shower',
-            'Stimulating pranayama (Kapalabhati)',
-            'Skip breakfast or have very light meal (fruit, tea)',
-            'Engage mind with challenging tasks early'
-        ]
-        rec['night_routine'] = [
-            'Light, early dinner before 6:00 PM',
-            'Evening activity (walk, yoga, social engagement)',
-            'Avoid heavy foods and snacking after dinner',
-            'Stimulating evening yoga (not too relaxing)',
-            'Dry sauna if available',
-            'Hot, stimulating shower',
-            'Avoid excessive sleep - aim for 6-7 hours only',
-            'In bed by 10:00 PM, wake before 6:00 AM'
-        ]
-
-    if not rec['morning_routine']:
-        rec['morning_routine'] = [
-            'Wake at consistent time (6:00 AM)', 'Drink warm water',
-            'Meditation and pranayama (15 minutes)',
-            'Exercise appropriate to season and constitution (30 minutes)',
-            'Shower', 'Nourishing breakfast suited to your dosha',
-            'Set intentions for the day'
-        ]
-    if not rec['night_routine']:
-        rec['night_routine'] = [
-            'Light dinner by 7:00 PM', 'Evening walk (15 minutes)',
-            'Gentle yoga or stretching', 'Relaxing activity (reading, journaling)',
-            'Herbal tea', 'In bed by 10:00 PM', 'Avoid screens before sleep'
-        ]
-    if not rec['lifestyle_tips']:
-        rec['lifestyle_tips'] = [
-            'Maintain consistent daily routine', 'Eat meals at regular times',
-            'Get adequate sleep for your constitution',
-            'Practice stress management daily', 'Adjust lifestyle with seasons'
-        ]
-
-    return rec
-
-
-# ─── MAIN HANDLER ───────────────────────────────────────────────────────────
+# ─── MAIN HANDLER ────────────────────────────────────────────────────────────
 
 def handle_submit_assessment(data):
     try:
+        email = data.get("email")
+        cur.execute("SELECT id FROM users WHERE email=%s", (email,))
+        user = cur.fetchone()
+        if user is None:
+            return {"error": "User not found"}, 404
+        user_id = user[0]
+
         answers = {
             'bodyFrame':         data.get('bodyFrame'),
             'skinType':          data.get('skinType'),
@@ -584,18 +443,41 @@ def handle_submit_assessment(data):
         }
         symptoms = data.get('symptoms', [])
 
-        dosha_scores          = calculate_advanced_dosha_scores(answers, symptoms)
+        dosha_scores          = calculate_hybrid_dosha_scores(answers, symptoms)
         total_score           = sum(dosha_scores.values())
         percentages           = {
             'vata':  round((dosha_scores['vata']  / total_score) * 100, 1),
             'pitta': round((dosha_scores['pitta'] / total_score) * 100, 1),
             'kapha': round((dosha_scores['kapha'] / total_score) * 100, 1)
         }
-        constitution_analysis = analyze_constitution(percentages)
-        recommendations       = generate_dynamic_recommendations(percentages, constitution_analysis, symptoms)
+        constitution_analysis = analyze_constitution_advanced(percentages)
+        recommendations       = generate_hybrid_recommendations(percentages, constitution_analysis, symptoms, answers)
         wellness_score        = calculate_wellness_score(percentages, symptoms)
 
+        cur.execute("""
+            INSERT INTO assessments (
+                user_id, body_frame, skin_type, hair_type, weight_pattern,
+                appetite, digestion, thirst, mind_state, sleep_pattern,
+                climate_preference, symptoms, dominant_dosha, constitution_type,
+                vata_percentage, pitta_percentage, kapha_percentage, wellness_score,
+                created_at
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
+        """, (
+            user_id, answers["bodyFrame"], answers["skinType"], answers["hairType"],
+            answers["weightPattern"], answers["appetite"], answers["digestion"],
+            answers["thirst"], answers["mindState"], answers["sleepPattern"],
+            answers["climatePreference"], ",".join(symptoms),
+            constitution_analysis["dominant"], constitution_analysis["type"],
+            percentages["vata"], percentages["pitta"], percentages["kapha"],
+            wellness_score,  datetime.now()
+        ))
+
+        assessment_id = cur.fetchone()[0]
+        conn.commit()
+
         return {
+            'assessmentId':      assessment_id,
             'dominantDosha':     constitution_analysis['dominant'],
             'secondaryDosha':    constitution_analysis['secondary'],
             'constitutionType':  constitution_analysis['type'],
@@ -619,4 +501,6 @@ def handle_submit_assessment(data):
         }, 200
 
     except Exception as e:
-        return {'error': str(e)}, 500
+        conn.rollback()
+        print(f"Error in submit_assessment: {e}")
+        return {"error": str(e)}, 500

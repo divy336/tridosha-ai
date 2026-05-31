@@ -88,14 +88,22 @@ const Assessment: React.FC = () => {
     setLoading(true);
 
     try {
+      const email = localStorage.getItem("userEmail");
+
+      if (!email) {
+        setError("Please login before submitting the assessment.");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+
       const response = await axios.post(
         "http://localhost:5000/api/submit-assessment",
-        formData,
+        { ...formData, email },
       );
-
       // Navigate to report page with results
       navigate("/report", { state: response.data });
     } catch (err) {
+
       setError(
         "Failed to submit assessment. Please ensure the backend server is running on port 5000.",
       );
