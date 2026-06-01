@@ -20,7 +20,7 @@ CREATE TABLE users (
 
     is_verified BOOLEAN DEFAULT FALSE,
 
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        _at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
 );
 
@@ -105,6 +105,6 @@ CREATE TABLE assessments (
     wellness_score FLOAT,
 
     created_at TIMESTAMP
-    DEFAULT CURRENT_TIMESTAMP
+    DEFAULT CURR    ENT_TIMESTAMP
 
 );
