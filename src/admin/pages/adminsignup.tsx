@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import axios from "axios";
-
+import "../design/signup.css";
 import { useNavigate } from "react-router-dom";
 
 function AdminSignup() {
