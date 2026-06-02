@@ -5,8 +5,7 @@ from datetime import datetime
 from db import conn, cur
 import json
 
-assessment = Blueprint('assessment', __name__)
-
+assessment = Blueprint("assessment_submit", __name__)
 @assessment.route("/api/submit-assessment", methods=['POST', 'OPTIONS'])
 def submit_assessment():
     """Advanced Ayurvedic Assessment with Hybrid Dosha Intelligence"""

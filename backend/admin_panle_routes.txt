@@ -1,0 +1,3 @@
+get_all_assessment route = /api/assessment/get_total (get)
+get_all_user route =  /api/assessment/get_total_user (get)
+find_user route =  /api/assessment/find_user (post)

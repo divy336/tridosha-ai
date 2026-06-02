@@ -2,6 +2,7 @@ from db import conn, cur
 import bcrypt
 from utils.send_admin_otp import send_admin_otp
 from utils.send_admin_reset_otp import send_admin_reset_otp
+from db import conn, cur
 
 
 def handle_admin_signup(data):

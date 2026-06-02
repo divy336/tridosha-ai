@@ -1,11 +1,13 @@
 from flask import Blueprint, request, jsonify
-from admin.controller import (
+from db import conn, cur
+
+from .controller import (
     handle_admin_signup,
     handle_admin_verify_otp,
     handle_admin_login,
     handle_admin_forgot_password,
     handle_admin_forgot_verify_otp,
-    handle_admin_reset_password,
+    handle_admin_reset_password
 )
 
 admin = Blueprint("admin", __name__)
