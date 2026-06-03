@@ -58,7 +58,7 @@ def send_admin_reset_otp(email):
 
         sender={
             "name": "Tridosha AI",
-            "email": email
+            "email": "nagardivya73@gmail.com"
         },
 
         subject="Admin Reset Password OTP",
