@@ -132,7 +132,7 @@ def handle_forgot_password(data):
         )
         conn.commit()
 
-        reset_link = f"http://localhost:5173/reset-password?token={token}&email={email}"
+        reset_link = f"https://tridosha-ai-1.onrender.com/reset-password?token={token}&email={email}"
         send_reset_email(email, reset_link)
 
         return {"message": "Reset link sent"}, 200

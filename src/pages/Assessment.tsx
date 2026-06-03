@@ -101,7 +101,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     }
 
     const response = await axios.post(
-      "http://tridosha-ai.onrender.com/api/submit-assessment",
+      "https://tridosha-ai.onrender.com/api/submit-assessment",
       {
         ...formData,
         email,
