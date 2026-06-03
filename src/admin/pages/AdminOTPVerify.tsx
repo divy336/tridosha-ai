@@ -27,7 +27,7 @@ function AdminOTPVerify() {
 
       const response = await axios.post(
 
-        "http://127.0.0.1:5000/api/admin/verify-otp",
+        "https://tridosha-ai.onrender.com/api/admin/verify-otp",
 
         {
           email: email,

@@ -20,7 +20,7 @@ function OTPVerify() {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/api/verify-otp",
+        "https://tridosha-ai.onrender.com/api/verify-otp",
 
         {
           email: email,

@@ -24,7 +24,7 @@ function AdminSignup() {
 
       const response = await axios.post(
 
-        "http://127.0.0.1:5000/api/admin/signup",
+        "https://tridosha-ai.onrender.com/api/admin/signup",
 
         {
           full_name: fullName,

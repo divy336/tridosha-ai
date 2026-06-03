@@ -17,7 +17,7 @@ function Signup() {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/api/signup",
+        "https://tridosha-ai.onrender.com/api/signup",
 
         {
           full_name: fullName,
