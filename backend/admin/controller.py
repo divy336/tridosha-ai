@@ -146,6 +146,8 @@ def handle_admin_forgot_password(data):
     try:
         email = data["email"]
 
+        print("EMAIL RECEIVED:", email)
+
         cur.execute(
             """
             SELECT * FROM users
@@ -154,17 +156,24 @@ def handle_admin_forgot_password(data):
             """,
             (email,)
         )
+
         admin_user = cur.fetchone()
+
+        print("ADMIN USER:", admin_user)
 
         if admin_user is None:
             return {"message": "Admin Not Found"}, 404
 
+        print("CALLING OTP FUNCTION")
+
         send_admin_reset_otp(email)
 
-        return {"message": "check your gmail "}, 200
+        print("OTP FUNCTION FINISHED")
+
+        return {"message": "check your gmail"}, 200
 
     except Exception as e:
-        print(e)
+        print("ERROR:", e)
         return {"message": "Server Error"}, 500
 
 
