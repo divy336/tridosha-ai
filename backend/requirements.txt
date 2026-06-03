@@ -18,3 +18,4 @@ itsdangerous==2.2.0
 click==8.1.8
 blinker==1.9.0
 greenlet==3.2.4
+sib-api-v3-sdk==7.6.0
