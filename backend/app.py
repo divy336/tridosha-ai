@@ -11,6 +11,7 @@ from assessment.router import assessment as assessment_api_bp
 from report.history import history
 
 app = Flask(__name__)
+app.secret_key = "my-secret-key"
 CORS(app)
 
 if not check_db_connection():
