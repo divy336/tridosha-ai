@@ -82,5 +82,6 @@ def send_admin_reset_otp(email):
         print("RESET OTP SENT")
 
     except ApiException as e:
-
-        print(e)
+        print("Brevo Error:")
+        print(e.body)
+        print(e) 
