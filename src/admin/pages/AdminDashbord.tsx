@@ -55,9 +55,9 @@ function AdminDashboard() {
       setError("");
 
       const [usersRes, assessmentsRes, allAssessmentsRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/assessment/get_total_user"),
-        axios.get("http://localhost:5000/api/assessment/get_total_assessment"),
-        axios.get("http://localhost:5000/api/assessment/get_all_assessments"),
+        axios.get("http://https://tridosha-ai.onrender.com/api/assessment/get_total_user"),
+        axios.get("http://https://tridosha-ai.onrender.com/api/assessment/get_total_assessment"),
+        axios.get("http://https://tridosha-ai.onrender.com/api/assessment/get_all_assessments"),
       ]);
 
       const usersValue =
@@ -114,7 +114,7 @@ function AdminDashboard() {
       setSelectedAssessment(localItem);
 
       const res = await axios.get(
-        `http://localhost:5000/api/assessment/details/${id}`
+        `http://https://tridosha-ai.onrender.com/api/assessment/details/${id}`
       );
 
       const data = res.data?.assessment || res.data;
