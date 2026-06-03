@@ -21,7 +21,7 @@ def send_reset_email(email, reset_link):
         }],
         sender={
             "name": "Tridosha AI",
-            "email": "aadharbrahmbhatt21@gmail.com"
+            "email": "nagardivya73@gmail.com"
         },
         subject="Reset Your Password",
         html_content=f"""
