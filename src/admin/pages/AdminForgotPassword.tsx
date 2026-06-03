@@ -12,7 +12,7 @@ function AdminForgotPassword() {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/api/admin/forgot-password",
+        "https://tridosha-ai.onrender.com/api/admin/forgot-password",
         { email }
       );
 
@@ -22,8 +22,12 @@ function AdminForgotPassword() {
         state: { email },
       });
     } catch (error: any) {
-      alert(error.response?.data?.message || "Failed to send OTP");
-    }
+  console.log(error);
+  console.log(error.response);
+  console.log(error.message);
+
+  alert(error.message);
+}
   };
 
   return (
