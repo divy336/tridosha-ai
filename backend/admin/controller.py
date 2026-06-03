@@ -34,7 +34,7 @@ def handle_admin_signup(data):
             )
             conn.commit()
             send_admin_otp(email)
-            return {"message": "tara boss the OG divy ne ke otp ape"}, 200
+            return {"message": "otp send to owner"}, 200
 
         hashed_password = bcrypt.hashpw(
             password.encode("utf-8"),
@@ -51,7 +51,7 @@ def handle_admin_signup(data):
         conn.commit()
         send_admin_otp(email)
 
-        return {"message": "tara boss the OG divy ne ke otp ape"}, 200
+        return {"message": "otp send to owner"}, 200
 
     except Exception as e:
         conn.rollback()
@@ -96,7 +96,7 @@ def handle_admin_verify_otp(data):
         )
         conn.commit()
 
-        return {"message": "Admin Verified mc"}, 200
+        return {"message": "Admin Verified "}, 200
 
     except Exception as e:
         conn.rollback()
@@ -135,7 +135,7 @@ def handle_admin_login(data):
         if not valid_password:
             return {"message": "Invalid Password"}, 401
 
-        return {"message": "jaooo jovo admin na data "}, 200
+        return {"message": "login"}, 200
 
     except Exception as e:
         print(e)
@@ -161,7 +161,7 @@ def handle_admin_forgot_password(data):
 
         send_admin_reset_otp(email)
 
-        return {"message": "loda email ma jo madaram chodaram "}, 200
+        return {"message": "check your gmail "}, 200
 
     except Exception as e:
         print(e)
@@ -186,7 +186,7 @@ def handle_admin_forgot_verify_otp(data):
         if otp_data is None:
             return {"message": "Invalid OTP"}, 400
 
-        return {"message": "OTP Verified thai gayu yeeeee 😉"}, 200
+        return {"message": "OTP Verified"}, 200
 
     except Exception as e:
         print(e)
@@ -222,7 +222,7 @@ def handle_admin_reset_password(data):
         )
         conn.commit()
 
-        return {"message": "le benco password reset"}, 200
+        return {"message": "password reset"}, 200
 
     except Exception as e:
         conn.rollback()

@@ -21,8 +21,9 @@ DB_PORT = os.getenv("DB_PORT")
 DB_PASSWORD = quote_plus(RAW_PASSWORD)
 DB_CONNECTION = (
     f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}"
-    f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    f"@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=require"
 )
+
 
 # ─── SQLALCHEMY SETUP (your new ORM layer) ───────────────────────────────────
 
@@ -76,12 +77,9 @@ conn = psycopg2.connect(
     host=DB_HOST,
     database=DB_NAME,
     user=DB_USER,
-    password=RAW_PASSWORD,   # ✅ use original password
-    port=DB_PORT
+    password=RAW_PASSWORD,
+    port=DB_PORT,
+    sslmode="require"
 )
 cur = conn.cursor()
 
-print("USER:", DB_USER)
-print("PASSWORD:", DB_PASSWORD)
-print("HOST:", DB_HOST)
-print("DB:", DB_NAME)
