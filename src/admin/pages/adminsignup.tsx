@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import axios from "axios";
+import "../../pages/design/admin.css";
 import { useNavigate } from "react-router-dom";
 
 function AdminSignup() {
@@ -59,7 +60,7 @@ function AdminSignup() {
 
   return (
 
-    <div>
+    <div className="admin-signup">
 
       <h1>Admin Signup</h1>
 

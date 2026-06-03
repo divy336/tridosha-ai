@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import "../../pages/design/admin.css";
 
 function AdminForgotPasswordOTP() {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ function AdminForgotPasswordOTP() {
   return (
     <div>
       <h1>Admin OTP Verify</h1>
-      <p>OTP sent to: {email}</p>
+     
 
       <form onSubmit={handleSubmit}>
         <input

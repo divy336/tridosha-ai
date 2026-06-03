@@ -1,0 +1,43 @@
+.admin-login {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-image: url("/src/assets/traditional-mortar-and-pestle-for-grinding-ingredients-photo.jpeg");
+    background-size: cover;
+    background-position: center;
+}
+
+.admin-login h1 {
+    color: white;
+    font-size: 3rem;
+    margin-bottom: 30px;
+}
+
+.admin-login form {
+    width: 500px;
+    padding: 40px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(15px);
+}
+
+.admin-login input {
+    width: 100%;
+    height: 55px;
+    padding: 15px;
+    border-radius: 12px;
+    border: none;
+}
+
+.admin-login button {
+    width: 100%;
+    height: 55px;
+    border: none;
+    border-radius: 12px;
+}
+
+.admin-login a {
+    color: white;
+}

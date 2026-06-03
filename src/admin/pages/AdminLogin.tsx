@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import axios from "axios";
+import "../../pages/design/adminlogin.css";
 
 import {
 
@@ -71,7 +72,7 @@ function AdminLogin() {
 
   return (
 
-    <div>
+    <div className="admin-login">
 
       <h1>Admin Login</h1>
 

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
 type AssessmentRow = {
   id: number;
   email?: string;
@@ -163,16 +162,17 @@ function AdminDashboard() {
   const pageStyles: Record<string, React.CSSProperties> = {
     page: {
       minHeight: "100vh",
-      background:
-        "linear-gradient(180deg, #f8f3ea 0%, #f3ead9 45%, #f9f6f0 100%)",
       color: "#2f2a25",
       padding: "24px",
       fontFamily:
         'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    
+      backdropFilter: "blur(2px)",
     },
     container: {
       maxWidth: "1280px",
       margin: "0 auto",
+      width: "100%",
     },
     topBar: {
       display: "flex",
@@ -181,12 +181,13 @@ function AdminDashboard() {
       gap: "16px",
       flexWrap: "wrap",
       marginBottom: "24px",
-      padding: "20px",
+      padding: "22px",
       background: "rgba(255,255,255,0.72)",
       border: "1px solid rgba(140, 92, 45, 0.15)",
-      borderRadius: "20px",
-      boxShadow: "0 10px 30px rgba(117, 82, 43, 0.08)",
-      backdropFilter: "blur(10px)",
+      borderRadius: "24px",
+      boxShadow: "0 12px 34px rgba(117, 82, 43, 0.10)",
+      backdropFilter: "blur(14px)",
+      WebkitBackdropFilter: "blur(14px)",
     },
     titleWrap: {
       display: "flex",
@@ -198,6 +199,7 @@ function AdminDashboard() {
       fontSize: "32px",
       lineHeight: 1.1,
       color: "#6a3f1d",
+      letterSpacing: "-0.02em",
     },
     subtitle: {
       margin: 0,
@@ -207,7 +209,7 @@ function AdminDashboard() {
     email: {
       margin: 0,
       color: "#8b5a2b",
-      fontWeight: 600,
+      fontWeight: 700,
       fontSize: "14px",
     },
     button: {
@@ -221,7 +223,7 @@ function AdminDashboard() {
     logoutBtn: {
       background: "linear-gradient(135deg, #8b4513, #a05a2c)",
       color: "#fff",
-      boxShadow: "0 10px 18px rgba(139,69,19,0.2)",
+      boxShadow: "0 10px 18px rgba(139,69,19,0.20)",
     },
     refreshBtn: {
       background: "#fff",
@@ -237,10 +239,11 @@ function AdminDashboard() {
     card: {
       background: "rgba(255,255,255,0.82)",
       border: "1px solid rgba(140, 92, 45, 0.14)",
-      borderRadius: "20px",
+      borderRadius: "22px",
       padding: "20px",
       boxShadow: "0 10px 28px rgba(117, 82, 43, 0.08)",
-      backdropFilter: "blur(10px)",
+      backdropFilter: "blur(12px)",
+      WebkitBackdropFilter: "blur(12px)",
     },
     statLabel: {
       margin: 0,
@@ -281,13 +284,16 @@ function AdminDashboard() {
       outline: "none",
       background: "#fff",
       color: "#2f2a25",
+      boxShadow: "0 4px 10px rgba(0,0,0,0.04)",
     },
     tableWrap: {
       overflowX: "auto",
-      borderRadius: "20px",
+      borderRadius: "22px",
       border: "1px solid rgba(140, 92, 45, 0.14)",
-      background: "rgba(255,255,255,0.82)",
+      background: "rgba(255,255,255,0.84)",
       boxShadow: "0 10px 28px rgba(117, 82, 43, 0.08)",
+      backdropFilter: "blur(10px)",
+      WebkitBackdropFilter: "blur(10px)",
     },
     table: {
       width: "100%",
@@ -327,6 +333,7 @@ function AdminDashboard() {
       background: "linear-gradient(135deg, #4b7f52, #2f6d3f)",
       color: "#fff",
       fontWeight: 700,
+      boxShadow: "0 10px 18px rgba(47, 109, 63, 0.18)",
     },
     empty: {
       padding: "26px",

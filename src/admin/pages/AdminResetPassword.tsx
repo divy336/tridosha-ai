@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import "../../pages/design/admin.css";
 
 function AdminResetPassword() {
   const navigate = useNavigate();
