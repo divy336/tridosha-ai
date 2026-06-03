@@ -1,12 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import axios from "axios";
+
+
 import "./design/dashboad.css";
 
 function Dashboard() {
   const navigate = useNavigate();
   const isLoggedIn = localStorage.getItem("isLoggedIn");
-  const userEmail = localStorage.getItem("userEmail");
   
 
   const handleLogout = () => {
