@@ -2,7 +2,18 @@ from db import conn, cur
 import bcrypt
 from utils.send_admin_otp import send_admin_otp
 from utils.send_admin_reset_otp import send_admin_reset_otp
-from db import conn, cur
+
+
+def _get_user_by_email(email):
+    cur.execute(
+        """
+        SELECT id, full_name, email, password, is_verified, role
+        FROM users
+        WHERE email=%s
+        """,
+        (email,)
+    )
+    return cur.fetchone()
 
 
 def handle_admin_signup(data):
@@ -13,45 +24,49 @@ def handle_admin_signup(data):
 
         cur.execute(
             """
-            SELECT * FROM users
+            SELECT id, full_name, email, password, is_verified, role
+            FROM users
             WHERE email=%s
             """,
             (email,)
         )
         existing_user = cur.fetchone()
 
+        hashed_password = bcrypt.hashpw(
+            password.encode("utf-8"),
+            bcrypt.gensalt()
+        ).decode("utf-8")
+
         if existing_user:
-            if existing_user[5] == True:
+            existing_role = existing_user[5]
+
+            if existing_role in ("admin", "owner"):
                 return {"message": "Already Admin"}, 400
 
             cur.execute(
                 """
                 UPDATE users
-                SET is_admin=TRUE
+                SET role=%s
                 WHERE email=%s
                 """,
-                (email,)
+                ("pending_admin", email)
             )
             conn.commit()
-            send_admin_otp(email)
-            return {"message": "otp send to owner"}, 200
 
-        hashed_password = bcrypt.hashpw(
-            password.encode("utf-8"),
-            bcrypt.gensalt()
-        )
+            send_admin_otp(email)
+            return {"message": "Admin approval OTP sent"}, 200
 
         cur.execute(
             """
-            INSERT INTO users (full_name, email, password, is_admin)
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO users (full_name, email, password, is_verified, role)
+            VALUES (%s, %s, %s, %s, %s)
             """,
-            (full_name, email, hashed_password.decode("utf-8"), True)
+            (full_name, email, hashed_password, False, "pending_admin")
         )
         conn.commit()
-        send_admin_otp(email)
 
-        return {"message": "otp send to owner"}, 200
+        send_admin_otp(email)
+        return {"message": "Admin approval OTP sent"}, 200
 
     except Exception as e:
         conn.rollback()
@@ -66,7 +81,8 @@ def handle_admin_verify_otp(data):
 
         cur.execute(
             """
-            SELECT * FROM otp_codes
+            SELECT id
+            FROM otp_codes
             WHERE email=%s
             AND otp_code=%s
             """,
@@ -80,12 +96,17 @@ def handle_admin_verify_otp(data):
         cur.execute(
             """
             UPDATE users
-            SET is_verified=TRUE
+            SET is_verified=TRUE,
+                role='admin'
             WHERE email=%s
+            AND role='pending_admin'
             """,
             (email,)
         )
-        conn.commit()
+
+        if cur.rowcount == 0:
+            conn.rollback()
+            return {"message": "No pending admin request found"}, 400
 
         cur.execute(
             """
@@ -94,9 +115,9 @@ def handle_admin_verify_otp(data):
             """,
             (email,)
         )
-        conn.commit()
 
-        return {"message": "Admin Verified "}, 200
+        conn.commit()
+        return {"message": "Admin Verified"}, 200
 
     except Exception as e:
         conn.rollback()
@@ -111,7 +132,8 @@ def handle_admin_login(data):
 
         cur.execute(
             """
-            SELECT * FROM users
+            SELECT id, full_name, email, password, is_verified, role
+            FROM users
             WHERE email=%s
             """,
             (email,)
@@ -121,21 +143,28 @@ def handle_admin_login(data):
         if user is None:
             return {"message": "Admin Not Found"}, 404
 
-        if user[5] == False:
+        user_password = user[3]
+        is_verified = user[4]
+        role = user[5]
+
+        if role not in ("admin", "owner"):
             return {"message": "Not Admin Account"}, 403
 
-        if user[4] == False:
+        if not is_verified:
             return {"message": "Admin Not Verified"}, 403
 
         valid_password = bcrypt.checkpw(
             password.encode("utf-8"),
-            user[3].encode("utf-8")
+            user_password.encode("utf-8")
         )
 
         if not valid_password:
             return {"message": "Invalid Password"}, 401
 
-        return {"message": "login"}, 200
+        return {
+            "message": "login",
+            "role": role
+        }, 200
 
     except Exception as e:
         print(e)
@@ -146,34 +175,29 @@ def handle_admin_forgot_password(data):
     try:
         email = data["email"]
 
-        print("EMAIL RECEIVED:", email)
-
         cur.execute(
             """
-            SELECT * FROM users
+            SELECT id, full_name, email, password, is_verified, role
+            FROM users
             WHERE email=%s
-            AND is_admin=TRUE
             """,
             (email,)
         )
-
         admin_user = cur.fetchone()
-
-        print("ADMIN USER:", admin_user)
 
         if admin_user is None:
             return {"message": "Admin Not Found"}, 404
 
-        print("CALLING OTP FUNCTION")
+        role = admin_user[5]
+
+        if role not in ("admin", "owner"):
+            return {"message": "Not Admin Account"}, 403
 
         send_admin_reset_otp(email)
-
-        print("OTP FUNCTION FINISHED")
-
         return {"message": "check your gmail"}, 200
 
     except Exception as e:
-        print("ERROR:", e)
+        print(e)
         return {"message": "Server Error"}, 500
 
 
@@ -184,7 +208,8 @@ def handle_admin_forgot_verify_otp(data):
 
         cur.execute(
             """
-            SELECT * FROM otp_codes
+            SELECT id
+            FROM otp_codes
             WHERE email=%s
             AND otp_code=%s
             """,
@@ -194,6 +219,23 @@ def handle_admin_forgot_verify_otp(data):
 
         if otp_data is None:
             return {"message": "Invalid OTP"}, 400
+
+        cur.execute(
+            """
+            SELECT role
+            FROM users
+            WHERE email=%s
+            """,
+            (email,)
+        )
+        user = cur.fetchone()
+
+        if user is None:
+            return {"message": "Admin Not Found"}, 404
+
+        role = user[0]
+        if role not in ("admin", "owner"):
+            return {"message": "Not Admin Account"}, 403
 
         return {"message": "OTP Verified"}, 200
 
@@ -207,10 +249,27 @@ def handle_admin_reset_password(data):
         email = data["email"]
         new_password = data["new_password"]
 
+        cur.execute(
+            """
+            SELECT role
+            FROM users
+            WHERE email=%s
+            """,
+            (email,)
+        )
+        user = cur.fetchone()
+
+        if user is None:
+            return {"message": "Admin Not Found"}, 404
+
+        role = user[0]
+        if role not in ("admin", "owner"):
+            return {"message": "Not Admin Account"}, 403
+
         hashed_password = bcrypt.hashpw(
             new_password.encode("utf-8"),
             bcrypt.gensalt()
-        )
+        ).decode("utf-8")
 
         cur.execute(
             """
@@ -218,9 +277,8 @@ def handle_admin_reset_password(data):
             SET password=%s
             WHERE email=%s
             """,
-            (hashed_password.decode("utf-8"), email)
+            (hashed_password, email)
         )
-        conn.commit()
 
         cur.execute(
             """
@@ -229,8 +287,8 @@ def handle_admin_reset_password(data):
             """,
             (email,)
         )
-        conn.commit()
 
+        conn.commit()
         return {"message": "password reset"}, 200
 
     except Exception as e:
